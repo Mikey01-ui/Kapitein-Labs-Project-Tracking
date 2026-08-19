@@ -1,0 +1,332 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  EMPLOYEE
+  MANAGER
+  ADMIN
+}
+
+enum ProjectStatus {
+  ACTIVE
+  ARCHIVED
+  COMPLETED
+}
+
+enum MilestoneStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum TRLReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id                String          @id @default(cuid())
+  name              String
+  email             String          @unique
+  passwordHash      String
+  role              UserRole        @default(EMPLOYEE)
+  roleId            String?
+  isActive          Boolean         @default(true)
+  isPending         Boolean         @default(false)
+  weeklyTargetHours Int             @default(40)
+  notificationEmail String?
+  phoneNumber       String?
+  location          String?
+  bio               String?
+  skills            String?
+  avatarUrl         String?
+  createdAt         DateTime        @default(now())
+  createdProjects   Project[]       @relation("CreatedProjects")
+  managedProjects   Project[]       @relation("ManagedProjects")
+  memberships       ProjectMember[]
+  hourLogs          HourLog[]
+  trlUpdates        TRLHistory[]
+  assignedCards     KanbanCard[]    @relation("CardAssignees")
+  comments          Comment[]
+  attachments       Attachment[]
+  activityLogs      ActivityLog[]
+  notifications     Notification[]
+  trlReviewSignoffs TRLSignoff[]
+  requestedReviews  TRLReview[]     @relation("RequestedReviews")
+  roleLink          Role?           @relation(fields: [roleId], references: [id])
+  expenses          Expense[]       @relation("UserExpenses")
+  approvedExpenses  Expense[]       @relation("ApprovedExpenses")
+}
+
+model Project {
+  id           String          @id @default(cuid())
+  name         String
+  description  String
+  startDate    DateTime
+  status       ProjectStatus   @default(ACTIVE)
+  currentTRL   Int
+  createdById  String
+  managerId    String
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  createdBy    User            @relation("CreatedProjects", fields: [createdById], references: [id])
+  manager      User            @relation("ManagedProjects", fields: [managerId], references: [id])
+  members      ProjectMember[]
+  hourLogs     HourLog[]
+  milestones   Milestone[]
+  trlHistory   TRLHistory[]
+  columns      KanbanColumn[]
+  cards        KanbanCard[]
+  attachments  Attachment[]
+  activityLogs ActivityLog[]
+  trlReviews   TRLReview[]
+  expenses     Expense[]
+}
+
+model ProjectMember {
+  id        String   @id @default(cuid())
+  projectId String
+  userId    String
+  joinedAt  DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+}
+
+model HourLog {
+  id          String       @id @default(cuid())
+  userId      String
+  projectId   String
+  cardId      String?
+  date        DateTime
+  hours       Decimal
+  notes       String?
+  werkpakket  String?
+  imageUrl    String?
+  startTime   String?
+  endTime     String?
+  createdAt   DateTime     @default(now())
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project     Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  card        KanbanCard?  @relation(fields: [cardId], references: [id], onDelete: SetNull)
+  attachments Attachment[]
+}
+
+model Milestone {
+  id          String          @id @default(cuid())
+  projectId   String
+  name        String
+  dueDate     DateTime
+  status      MilestoneStatus @default(PENDING)
+  completedAt DateTime?
+  notes       String?
+  project     Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model TRLHistory {
+  id            String   @id @default(cuid())
+  projectId     String
+  trlLevel      Int
+  updatedById   String
+  justification String
+  recordedAt    DateTime @default(now())
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  updatedBy     User     @relation(fields: [updatedById], references: [id])
+}
+
+model KanbanColumn {
+  id        String       @id @default(cuid())
+  projectId String
+  title     String
+  order     Int
+  project   Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  cards     KanbanCard[]
+}
+
+model KanbanCard {
+  id             String          @id @default(cuid())
+  columnId       String
+  projectId      String
+  title          String
+  description    String?
+  dueDate        DateTime?
+  priority       Priority        @default(MEDIUM)
+  order          Int
+  trlLevel       Int?
+  createdAt      DateTime        @default(now())
+  column         KanbanColumn    @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignees      User[]          @relation("CardAssignees")
+  comments       Comment[]
+  checklistItems ChecklistItem[]
+  attachments    Attachment[]
+  activityLogs   ActivityLog[]
+  hourLogs       HourLog[]
+}
+
+model ChecklistItem {
+  id          String     @id @default(cuid())
+  cardId      String
+  title       String
+  isCompleted Boolean    @default(false)
+  order       Int
+  createdAt   DateTime   @default(now())
+  card        KanbanCard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+}
+
+model Comment {
+  id        String     @id @default(cuid())
+  cardId    String
+  userId    String
+  content   String
+  createdAt DateTime   @default(now())
+  card      KanbanCard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Attachment {
+  id           String      @id @default(cuid())
+  name         String
+  url          String
+  size         Int
+  mimeType     String?
+  uploadedById String
+  projectId    String?
+  cardId       String?
+  hourLogId    String?
+  expenseId    String?
+  ocrText      String?     @db.Text
+  ocrStatus    String?     @default("PENDING")
+  aiAnalysis   Json?
+  metadata     Json?
+  createdAt    DateTime    @default(now())
+  uploadedBy   User        @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+  project      Project?    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  card         KanbanCard? @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  hourLog      HourLog?    @relation(fields: [hourLogId], references: [id], onDelete: Cascade)
+  expense      Expense?    @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+}
+
+model ActivityLog {
+  id         String      @id @default(cuid())
+  userId     String
+  projectId  String?
+  cardId     String?
+  actionType String
+  details    String?
+  createdAt  DateTime    @default(now())
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project    Project?    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  card       KanbanCard? @relation(fields: [cardId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  recipientId String
+  title       String
+  message     String
+  isRead      Boolean  @default(false)
+  type        String
+  link        String?
+  createdAt   DateTime @default(now())
+  recipient   User     @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+}
+
+model TRLReview {
+  id            String          @id @default(cuid())
+  projectId     String
+  targetLevel   Int
+  requestedById String
+  status        TRLReviewStatus @default(PENDING)
+  notes         String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  project       Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  requestedBy   User            @relation("RequestedReviews", fields: [requestedById], references: [id])
+  signoffs      TRLSignoff[]
+}
+
+model TRLSignoff {
+  id        String    @id @default(cuid())
+  reviewId  String
+  userId    String
+  approved  Boolean   @default(false)
+  feedback  String?
+  signedAt  DateTime?
+  review    TRLReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id])
+
+  @@unique([reviewId, userId])
+}
+
+model TRLCriteria {
+  id          String   @id @default(cuid())
+  trlLevel    Int
+  description String
+  createdAt   DateTime @default(now())
+
+  @@unique([trlLevel, description])
+}
+
+model Role {
+  id          String           @id @default(cuid())
+  name        String           @unique // "ADMIN", "MANAGER", "EMPLOYEE"
+  users       User[]
+  permissions RolePermission[]
+}
+
+model Permission {
+  id    String           @id @default(cuid())
+  name  String           @unique // e.g. "CREATE_PROJECT", "APPROVE_USER", "MANAGE_TEAM"
+  roles RolePermission[]
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
+enum ExpenseStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Expense {
+  id           String        @id @default(cuid())
+  userId       String
+  projectId    String?       // Optional link to project (can be general/others)
+  amount       Decimal
+  currency     String        @default("EUR")
+  merchant     String
+  date         DateTime
+  category     String        // e.g. Travel, Hardware, Software, Supplies, Other
+  notes        String?
+  status       ExpenseStatus @default(PENDING)
+  approvedById String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  user         User          @relation("UserExpenses", fields: [userId], references: [id], onDelete: Cascade)
+  project      Project?      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  approvedBy   User?         @relation("ApprovedExpenses", fields: [approvedById], references: [id])
+  attachments  Attachment[]
+}
