@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import { getJwtSecret } from "../utils/env.js";
 
 interface DecodedToken {
   userId: string;
@@ -27,10 +28,7 @@ export function requireAuth(request: Request, response: Response, next: NextFunc
   const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET || "kapetein-labs-development-secret-key-123!"
-    ) as DecodedToken;
+    const decoded = jwt.verify(token, getJwtSecret()) as DecodedToken;
     
     request.user = decoded;
     next();

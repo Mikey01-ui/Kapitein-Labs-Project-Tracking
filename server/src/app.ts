@@ -15,13 +15,26 @@ import { uploadRouter } from "./routes/upload.routes.js";
 import { activityRouter } from "./routes/activity.routes.js";
 import { aiOnboardingRouter } from "./routes/aiOnboarding.routes.js";
 import { expensesRouter } from "./routes/expenses.routes.js";
+import { getAllowedOrigins } from "./utils/env.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export const app = express();
 
-app.use(cors({ origin: process.env.CLIENT_ORIGIN ?? "http://localhost:5173" }));
+const allowedOrigins = getAllowedOrigins();
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes("*")) {
+        callback(null, true);
+        return;
+      }
+      callback(null, false);
+    },
+  })
+);
 app.use(express.json({ limit: "10mb" }));
 app.use((req, res, next) => {
   console.log(`[REQUEST] ${req.method} ${req.url} - Host: ${req.headers.host}`);

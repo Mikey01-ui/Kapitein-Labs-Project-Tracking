@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: "kapetein-api",
+      name: "kapitein-api",
       cwd: "./server",
       script: "dist/server.js",
       exec_mode: "fork",
@@ -15,7 +15,7 @@ module.exports = {
       },
     },
     {
-      name: "kapetein-web",
+      name: "kapitein-web",
       cwd: "./client",
       script: "node_modules/vite/bin/vite.js",
       args: "preview --port 5173 --host",
@@ -27,15 +27,6 @@ module.exports = {
       env: {
         NODE_ENV: "production",
       },
-    },
-    {
-      name: "kapetein-tunnel",
-      script: "/usr/local/bin/cloudflared",
-      args: "tunnel --url http://localhost:4000",
-      autorestart: true,
-      watch: false,
-      log_file: "/home/choso/Choso-Track/kapetein-tunnel.log",
-      error_file: "/home/choso/Choso-Track/kapetein-tunnel.err",
     },
   ],
 };

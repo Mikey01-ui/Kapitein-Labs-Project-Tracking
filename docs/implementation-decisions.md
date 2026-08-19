@@ -22,8 +22,8 @@ These decisions extend the handoff spec and should guide implementation.
 
 ## Hosting
 
-- Initial target is homelab hosting.
-- Keep environment configuration simple and explicit.
+- Production target is Docker Compose (PostgreSQL + API + nginx).
+- Keep environment configuration in `.env` files. Never commit secrets.
 
 ## Build Order
 

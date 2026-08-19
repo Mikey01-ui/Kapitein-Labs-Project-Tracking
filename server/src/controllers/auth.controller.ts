@@ -5,8 +5,7 @@ import { prisma } from "../services/prisma.js";
 import { createNotification } from "../services/notificationService.js";
 import { emailService } from "../services/emailService.js";
 import { logActivity } from "../services/activityService.js";
-
-const JWT_SECRET = process.env.JWT_SECRET || "kapetein-labs-development-secret-key-123!";
+import { getJwtSecret } from "../utils/env.js";
 
 export async function register(request: Request, response: Response) {
   const { name, email, password, role } = request.body;
@@ -149,7 +148,7 @@ export async function login(request: Request, response: Response) {
     // Generate JWT
     const token = jwt.sign(
       { userId: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
+      getJwtSecret(),
       { expiresIn: "7d" }
     );
 

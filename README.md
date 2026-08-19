@@ -1,29 +1,94 @@
-# KapeteinLabs Project Tracking Platform
+# Kapitein Labs — Project Tracking Platform
 
-Internal web app for tracking projects, assigned teams, hours, milestones, TRL progress, reports, and admin/user management.
+Internal web app for Kapitein Labs to track projects, teams, hours, milestones, TRL (1–9), Kanban boards, expenses, and admin/user access.
 
-## Current Build Phase
+This repository is set up so a host can run the full stack with Docker.
 
-The project is being scaffolded UI-first. Pages should use realistic mock data now, then later swap to API-backed data after the PostgreSQL/Prisma schema, authentication, and user accounts are implemented.
+## Architecture
 
-## Product Decisions Captured
+```
+Browser
+   │
+   ▼
+nginx (web)  :8080
+   ├─ static React app
+   ├─ /api/*      → Express API
+   └─ /uploads/*  → Express API
+          │
+          ▼
+     Node API :4000
+          │
+          ▼
+     PostgreSQL 15
+```
 
-- Employees can only see projects they are assigned to.
-- Hour logs do not require manager approval.
-- TRL definitions are not finalized yet.
-- Initial hosting target is a homelab.
-- UI will be built page by page from Figma mockups.
+| Path | What it is |
+| --- | --- |
+| `client/` | React + Vite + Tailwind frontend |
+| `server/` | Express API, Prisma, PostgreSQL |
+| `deploy/` | Dockerfiles and nginx config |
+| `docs/` | Product decisions and planning docs |
+| `docker-compose.yml` | Production-style local/hosting stack |
 
-## Structure
+## Quick start (hosting)
 
-- `client` - React, React Router, Tailwind-ready frontend.
-- `server` - Express API, middleware, route/controller structure, Prisma schema.
-- `docs` - local implementation notes and decisions.
+1. Copy environment variables:
 
-## Planned Workflow
+```bash
+cp .env.example .env
+```
 
-1. Build and refine UI pages from Figma using mock data.
-2. Finalize the data model based on the completed UI.
-3. Add PostgreSQL storage through Prisma.
-4. Add auth, roles, and account creation.
-5. Replace mock data with real API calls page by page.
+2. Change these values in `.env` before going live:
+
+- `POSTGRES_PASSWORD`
+- `JWT_SECRET`
+- `ADMIN_EMAIL` / `ADMIN_PASSWORD`
+- `CLIENT_ORIGIN` (the public URL, e.g. `https://tracker.example.com`)
+
+3. Start:
+
+```bash
+docker compose up --build -d
+```
+
+4. Open `http://localhost:8080` and log in with `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
+
+Change the admin password after first login. Then set `RUN_SEED=false` so later restarts do not try to reseed.
+
+Full hosting notes: [docs/HOSTING.md](docs/HOSTING.md)
+
+## Local development
+
+Needs Node.js 20+ and PostgreSQL 15.
+
+```bash
+cp server/.env.example server/.env
+# edit DATABASE_URL, JWT_SECRET, ADMIN_* 
+
+npm install
+npm run db:generate
+npm run db:migrate
+npm run db:seed
+npm run dev
+```
+
+- App: http://localhost:5173
+- API: http://localhost:4000/api/health
+
+## Roles
+
+- **Employee** — sees only assigned projects; can log hours and expenses
+- **Manager** — manages assigned projects, hours, milestones, and TRL
+- **Admin** — full access, user approval, settings
+
+Hour logs do not require manager approval.
+
+## Scripts
+
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Client + API in watch mode |
+| `npm run build` | Production build of API and client |
+| `npm run db:migrate` | Create/apply a development migration |
+| `npm run db:deploy` | Apply migrations (production) |
+| `npm run db:seed` | Create the initial admin if the DB is empty |

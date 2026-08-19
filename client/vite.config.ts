@@ -33,7 +33,7 @@ export default defineConfig(({ mode }) => {
       }
     },
     define: {
-      "process.env.REACT_APP_NOVU_APPLICATION_IDENTIFIER": JSON.stringify(env.REACT_APP_NOVU_APPLICATION_IDENTIFIER || "_MQ5qcufaHxS"),
+      "process.env.REACT_APP_NOVU_APPLICATION_IDENTIFIER": JSON.stringify(env.REACT_APP_NOVU_APPLICATION_IDENTIFIER || ""),
       "process.env.NOVU_BACKEND_URL": JSON.stringify(env.NOVU_BACKEND_URL || undefined),
       "process.env.NOVU_SOCKET_URL": JSON.stringify(env.NOVU_SOCKET_URL || undefined)
     }

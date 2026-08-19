@@ -1,12 +1,17 @@
 {
   "name": "kapetein-labs-project-tracking",
   "private": true,
-  "version": "0.1.0",
-  "description": "Internal project tracking platform for KapeteinLabs.",
+  "version": "1.0.0",
+  "description": "Internal project tracking platform for Kapitein Labs.",
   "scripts": {
     "dev": "concurrently \"npm run dev --workspace client\" \"npm run dev --workspace server\"",
-    "build": "npm run build --workspace client",
-    "typecheck": "npm run typecheck --workspace client && npm run typecheck --workspace server"
+    "build": "npm run build --workspace server && npm run build --workspace client",
+    "start": "npm run start --workspace server",
+    "typecheck": "npm run typecheck --workspace client && npm run typecheck --workspace server",
+    "db:generate": "npm run prisma:generate --workspace server",
+    "db:migrate": "npm run prisma:migrate --workspace server",
+    "db:deploy": "npm run prisma:deploy --workspace server",
+    "db:seed": "npm run prisma:seed --workspace server"
   },
   "workspaces": [
     "client",
