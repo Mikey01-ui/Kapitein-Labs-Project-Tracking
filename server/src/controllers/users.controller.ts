@@ -2,7 +2,7 @@ import type { Request, Response } from "express";
 import { prisma } from "../services/prisma.js";
 import { createNotification } from "../services/notificationService.js";
 import { logActivity } from "../services/activityService.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 export async function listUsers(request: Request, response: Response) {
   try {
