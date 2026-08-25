@@ -1,137 +1,92 @@
 # Hosting guide
 
-Recommended path: **Docker Compose**. That gives you PostgreSQL, the API, and an nginx frontend that proxies `/api` and `/uploads`.
+Production path: **Vercel** for the web app and API, **Supabase** for Postgres and file storage.
 
-## What you need
+Target URL: `https://www.proj.kapiteinlabs.com`
 
-- Docker and Docker Compose v2
-- A domain (optional, but use HTTPS in production)
-- 1 vCPU / 1 GB RAM is enough to start
+Docker Compose remains available for local-only use.
 
-## 1. Configure environment
+## 1. Create the Supabase project
 
-```bash
-cp .env.example .env
-```
+1. Sign up at [supabase.com](https://supabase.com) and create a project (region e.g. `eu-central-1`).
+2. **Settings → Database → Connection string**
+   - **Session pooler / Transaction pooler** (port `6543`) → `DATABASE_URL`. Append `?pgbouncer=true` if it is not already there.
+   - **Direct connection** (port `5432`) → `DIRECT_URL`. Used only for `prisma migrate`.
+   - If `db.<project>.supabase.co:5432` is unreachable (IPv6), use the **Session pooler** on port `5432` as `DIRECT_URL` instead. Do **not** add `pgbouncer=true` to that URI.
+3. **Settings → API**
+   - Project URL → `SUPABASE_URL`
+   - Secret / `service_role` key → `SUPABASE_SERVICE_ROLE_KEY` (server only, never a `VITE_` variable). The newer `sb_secret_...` key works here.
+4. **Storage → New bucket**
+   - Name: `uploads`
+   - Public: **off** (private). The API creates long-lived signed URLs.
 
-Required:
-
-| Variable | Notes |
-| --- | --- |
-| `POSTGRES_PASSWORD` | Strong password — also used by the API to connect |
-| `JWT_SECRET` | Long random string |
-| `CLIENT_ORIGIN` | Public site origin, comma-separated if needed. Example: `https://tracker.example.com` |
-| `ADMIN_EMAIL` | First admin login |
-| `ADMIN_PASSWORD` | First admin password — change after login |
-| `RUN_SEED` | `true` on first boot, then `false` |
-
-Optional: SMTP / Resend / Novu / Anthropic keys for email, inbox, and AI onboarding.
-
-If the public URL is `https://tracker.example.com`, set:
-
-```env
-CLIENT_ORIGIN=https://tracker.example.com
-```
-
-Leave `VITE_API_BASE_URL=/api` (the nginx container already proxies that path).
-
-## 2. Start the stack
+## 2. Apply the database schema (once, from your laptop)
 
 ```bash
-docker compose up --build -d
-docker compose ps
-docker compose logs -f api
+cp server/.env.example server/.env
 ```
 
-The app is on port **8080** by default. Override with `WEB_PORT` in `.env`.
-
-Health check: `http://localhost:8080/api/health` should return `{ "ok": true }`.
-
-## 3. First login
-
-Use `ADMIN_EMAIL` and `ADMIN_PASSWORD`. Create other users from the admin panel, or let people register and approve them.
-
-After that:
-
-```env
-RUN_SEED=false
-```
-
-The seed script does **not** wipe data unless `SEED_RESET=true`.
-
-## 4. Put it on a domain
-
-Point DNS at the host, then put TLS in front of port 8080 (Caddy, nginx, Traefik, or a cloud load balancer).
-
-Example Caddyfile:
-
-```
-tracker.example.com {
-  reverse_proxy 127.0.0.1:8080
-}
-```
-
-Set `CLIENT_ORIGIN` to that HTTPS origin and recreate the API container:
-
-```bash
-docker compose up -d api
-```
-
-## Data and backups
-
-Docker volumes:
-
-- `postgres_data` — database
-- `uploads_data` — uploaded files (receipts, attachments)
-
-Postgres dump:
-
-```bash
-docker compose exec postgres pg_dump -U kapitein project_tracking > backup.sql
-```
-
-Restore:
-
-```bash
-docker compose exec -T postgres psql -U kapitein project_tracking < backup.sql
-```
-
-## Updates
-
-```bash
-git pull
-docker compose up --build -d
-```
-
-Startup always runs `prisma migrate deploy`, so schema changes in `server/prisma/migrations` are applied automatically.
-
-## Alternative: Node + PM2 (no Docker for the app)
-
-1. Install Node 20 and PostgreSQL 15.
-2. Create the database and copy `server/.env.example` to `server/.env`.
-3. Install and build:
+Set `DATABASE_URL`, `DIRECT_URL`, `JWT_SECRET`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD`, then:
 
 ```bash
 npm install
-npm run db:generate
 npm run db:deploy
 npm run db:seed
-npm run build
-pm2 start ecosystem.config.cjs
 ```
 
-Put nginx in front of:
+Log in later with `ADMIN_EMAIL` / `ADMIN_PASSWORD`, then change that password. The seed does **not** wipe data unless `SEED_RESET=true`.
 
-- frontend: `http://127.0.0.1:5173`
-- API: `http://127.0.0.1:4000`
+## 3. Deploy on Vercel
 
-Or keep using the Docker `web` image even if the API runs on the host.
+1. Import GitHub repo `Mikey01-ui/Kapitein-Labs-Project-Tracking`.
+2. Root directory: repository root. Framework: Other (this repo sets `vercel.json`).
+3. Project environment variables:
+
+| Name | Value |
+| --- | --- |
+| `DATABASE_URL` | Supabase pooled URI (`6543`, `pgbouncer=true`) |
+| `DIRECT_URL` | Supabase direct URI (`5432`) |
+| `JWT_SECRET` | Long random string |
+| `CLIENT_ORIGIN` | `https://www.proj.kapiteinlabs.com,https://proj.kapiteinlabs.com` plus the `*.vercel.app` URL until DNS is live |
+| `SUPABASE_URL` | Project URL |
+| `SUPABASE_SERVICE_ROLE_KEY` | Service role key |
+| `SUPABASE_STORAGE_BUCKET` | `uploads` |
+| Optional | `ANTHROPIC_API_KEY`, SMTP / Resend |
+
+`*.vercel.app` preview URLs are allowed by CORS automatically.
+
+4. Deploy. Health check: `https://<project>.vercel.app/api/health` should return `{ "ok": true }`.
+
+Uploads go through `POST /api/upload` as base64 JSON. Vercel caps that body at about **4.5 MB**.
+
+## 4. Custom domain
+
+When DNS for `kapiteinlabs.com` is ready:
+
+1. Vercel → Project → Domains → add `www.proj.kapiteinlabs.com`.
+2. Optionally add `proj.kapiteinlabs.com` and redirect it to `www`.
+3. At the DNS host, create the CNAME Vercel shows (usually `cname.vercel-dns.com`).
+4. Set `CLIENT_ORIGIN` to the HTTPS origins and redeploy.
+
+## Local Docker (optional)
+
+```bash
+cp .env.example .env
+docker compose up --build -d
+```
+
+Opens at `http://localhost:8080`. This uses a local Postgres container, not Supabase, unless you point `DATABASE_URL` / `DIRECT_URL` at Supabase and set the Storage keys.
+
+## Updates
+
+Push to `main`. Vercel rebuilds automatically. Schema changes: add a Prisma migration, run `npm run db:deploy` against Supabase, then deploy.
 
 ## Troubleshooting
 
 | Symptom | Likely cause |
 | --- | --- |
-| Login fails after first boot | Seed skipped because users already exist, or `ADMIN_*` does not match |
-| CORS error in the browser | `CLIENT_ORIGIN` does not match the exact public origin (scheme + host + port) |
-| `/api` 502 | API container is not healthy — `docker compose logs api` |
-| Empty site on refresh of a deep URL | nginx `try_files` missing — use the bundled `deploy/nginx.conf` |
+| Prisma connection errors / `prepared statement` | Using the direct `5432` URI as `DATABASE_URL` instead of the pooled `6543` URI |
+| Login fails after first seed | Users already exist, or `ADMIN_*` does not match |
+| CORS error | Add the exact origin (scheme + host) to `CLIENT_ORIGIN` |
+| Uploads 413 / fail | File larger than ~4.5 MB, or Storage bucket `uploads` missing |
+| Empty site on a deep URL | SPA rewrite missing — `vercel.json` must rewrite non-`/api` routes to `index.html` |

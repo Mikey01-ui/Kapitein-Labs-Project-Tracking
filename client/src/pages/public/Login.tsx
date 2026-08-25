@@ -36,14 +36,25 @@ export function Login() {
         })
       });
 
-      const data = await res.json();
+      const text = await res.text();
+      let data: { message?: string; token?: string; user?: User } = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        setError("Failed to connect to authentication server.");
+        return;
+      }
 
       if (!res.ok) {
         setError(data.message || "Invalid credentials.");
         return;
       }
 
-      // Authenticate user session with JWT token
+      if (!data.token || !data.user) {
+        setError("Failed to connect to authentication server.");
+        return;
+      }
+
       login(data.token, data.user);
       navigate("/dashboard");
     } catch (err) {

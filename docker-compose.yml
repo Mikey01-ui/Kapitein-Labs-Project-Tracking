@@ -26,6 +26,7 @@ services:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: ${PORT:-4000}
       DATABASE_URL: postgresql://${POSTGRES_USER:-kapitein}:${POSTGRES_PASSWORD:-change-me}@postgres:5432/${POSTGRES_DB:-project_tracking}?schema=public
+      DIRECT_URL: postgresql://${POSTGRES_USER:-kapitein}:${POSTGRES_PASSWORD:-change-me}@postgres:5432/${POSTGRES_DB:-project_tracking}?schema=public
       JWT_SECRET: ${JWT_SECRET:-replace-with-a-long-random-string}
       CLIENT_ORIGIN: ${CLIENT_ORIGIN:-http://localhost:8080}
       ADMIN_NAME: ${ADMIN_NAME:-Administrator}
@@ -40,6 +41,9 @@ services:
       RESEND_API_KEY: ${RESEND_API_KEY:-}
       NOVU_SECRET_KEY: ${NOVU_SECRET_KEY:-}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      SUPABASE_URL: ${SUPABASE_URL:-}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
+      SUPABASE_STORAGE_BUCKET: ${SUPABASE_STORAGE_BUCKET:-uploads}
     volumes:
       - uploads_data:/app/server/uploads
     expose:

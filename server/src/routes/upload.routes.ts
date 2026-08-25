@@ -1,14 +1,9 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/requireAuth.js";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
 import { prisma } from "../services/prisma.js";
 import { analyzeAttachment } from "../services/imageAnalyzer.js";
 import { logActivity } from "../services/activityService.js";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { storeUpload } from "../services/storage.js";
 
 export const uploadRouter = Router();
 
@@ -27,7 +22,6 @@ uploadRouter.post("/", requireAuth, async (req, res) => {
   }
 
   try {
-    // Content is expected to be a base64 data URL: e.g. "data:image/png;base64,iVBORw0..."
     const matches = content.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
     if (!matches || matches.length !== 3) {
       res.status(400).json({ message: "Invalid base64 image content format." });
@@ -37,22 +31,9 @@ uploadRouter.post("/", requireAuth, async (req, res) => {
     const mimeType = matches[1];
     const base64Data = matches[2];
     const buffer = Buffer.from(base64Data, "base64");
+    const stored = await storeUpload(buffer, filename, mimeType);
+    const fileUrl = stored.url;
 
-    // Ensure uploads directory exists (in server/uploads/)
-    const uploadsDir = path.join(__dirname, "../../uploads");
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
-    }
-
-    const fileExt = path.extname(filename) || ".png";
-    const uniqueFilename = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}${fileExt}`;
-    const filePath = path.join(uploadsDir, uniqueFilename);
-
-    await fs.promises.writeFile(filePath, buffer);
-
-    const fileUrl = `/uploads/${uniqueFilename}`;
-
-    // If cardId is provided, also create an Attachment record in the database
     if (cardId) {
       const card = await prisma.kanbanCard.findUnique({
         where: { id: cardId }
@@ -74,7 +55,6 @@ uploadRouter.post("/", requireAuth, async (req, res) => {
       }
     }
 
-    // If hourLogId is provided, also create an Attachment record in the database
     if (hourLogId) {
       const hourLog = await prisma.hourLog.findUnique({
         where: { id: hourLogId }
@@ -96,7 +76,6 @@ uploadRouter.post("/", requireAuth, async (req, res) => {
       }
     }
 
-    // If expenseId is provided, also create an Attachment record in the database
     if (expenseId) {
       const expense = await prisma.expense.findUnique({
         where: { id: expenseId }

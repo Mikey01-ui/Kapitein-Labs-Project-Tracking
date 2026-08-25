@@ -22,8 +22,9 @@ These decisions extend the handoff spec and should guide implementation.
 
 ## Hosting
 
-- Production target is Docker Compose (PostgreSQL + API + nginx).
-- Keep environment configuration in `.env` files. Never commit secrets.
+- Production target is Vercel (SPA + Express API) with Supabase (Postgres + Storage).
+- Custom domain: `https://www.proj.kapiteinlabs.com`.
+- Keep environment configuration in `.env` files / Vercel project settings. Never commit secrets.
 
 ## Build Order
 

@@ -3,8 +3,7 @@ import { prisma } from "../services/prisma.js";
 import { logActivity } from "../services/activityService.js";
 import { createNotification } from "../services/notificationService.js";
 import { analyzeAttachment } from "../services/imageAnalyzer.js";
-import fs from "fs";
-import path from "path";
+import { getStoredFileSize } from "../services/storage.js";
 
 // List expenses
 export async function listExpenses(request: Request, response: Response) {
@@ -112,17 +111,13 @@ export async function createExpense(request: Request, response: Response) {
 
       if (!attachment) {
         // Create a new attachment record since it wasn't created during upload
-        const filename = attachmentUrl.split("/").pop() || "receipt.png";
+        const filename = attachmentUrl.split("?")[0].split("/").pop() || "receipt.png";
         const ext = filename.split(".").pop()?.toLowerCase();
         const mimeType = ext === "pdf" ? "application/pdf" : `image/${ext || "png"}`;
         
         let size = 0;
         try {
-          const filePath = path.join(process.cwd(), "uploads", filename);
-          if (fs.existsSync(filePath)) {
-            const stats = fs.statSync(filePath);
-            size = stats.size;
-          }
+          size = await getStoredFileSize(attachmentUrl);
         } catch (e) {
           console.error("Failed to get physical file size:", e);
         }

@@ -16,6 +16,7 @@ import { activityRouter } from "./routes/activity.routes.js";
 import { aiOnboardingRouter } from "./routes/aiOnboarding.routes.js";
 import { expensesRouter } from "./routes/expenses.routes.js";
 import { getAllowedOrigins } from "./utils/env.js";
+import { isSupabaseStorageEnabled } from "./services/storage.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,7 +28,12 @@ const allowedOrigins = getAllowedOrigins();
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes("*")) {
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        allowedOrigins.includes("*") ||
+        origin.endsWith(".vercel.app")
+      ) {
         callback(null, true);
         return;
       }
@@ -35,14 +41,15 @@ app.use(
     },
   })
 );
-app.use(express.json({ limit: "10mb" }));
+app.use(express.json({ limit: "4.5mb" }));
 app.use((req, res, next) => {
   console.log(`[REQUEST] ${req.method} ${req.url} - Host: ${req.headers.host}`);
   next();
 });
 
-// Static files serving
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+if (!isSupabaseStorageEnabled()) {
+  app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+}
 
 app.get("/api/health", (_request, response) => {
   response.json({ ok: true });

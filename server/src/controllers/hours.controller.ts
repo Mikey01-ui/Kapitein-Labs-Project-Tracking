@@ -1,8 +1,7 @@
 import type { Request, Response } from "express";
-import fs from "fs";
-import path from "path";
 import { prisma } from "../services/prisma.js";
 import { logActivity } from "../services/activityService.js";
+import { getStoredFileSize } from "../services/storage.js";
 
 // List logs for current user
 export async function listMyHours(request: Request, response: Response) {
@@ -92,15 +91,7 @@ export async function createHourLog(request: Request, response: Response) {
       for (const url of urls) {
         let fileSize = 0;
         try {
-          const uploadsDir = path.join(process.cwd(), "uploads");
-          const filename = url.split("/").pop();
-          if (filename) {
-            const filePath = path.join(uploadsDir, filename);
-            if (fs.existsSync(filePath)) {
-              const stats = fs.statSync(filePath);
-              fileSize = stats.size;
-            }
-          }
+          fileSize = await getStoredFileSize(url);
         } catch (err) {
           console.error("Failed to read file size:", err);
         }
@@ -108,7 +99,7 @@ export async function createHourLog(request: Request, response: Response) {
         try {
           await prisma.attachment.create({
             data: {
-              name: url.split("/").pop() || "proof.png",
+              name: (url.split("?")[0].split("/").pop()) || "proof.png",
               url,
               size: fileSize,
               mimeType: "image/png",
@@ -229,22 +220,14 @@ export async function updateHourLog(request: Request, response: Response) {
         for (const url of urls) {
           let fileSize = 0;
           try {
-            const uploadsDir = path.join(process.cwd(), "uploads");
-            const filename = url.split("/").pop();
-            if (filename) {
-              const filePath = path.join(uploadsDir, filename);
-              if (fs.existsSync(filePath)) {
-                const stats = fs.statSync(filePath);
-                fileSize = stats.size;
-              }
-            }
+            fileSize = await getStoredFileSize(url);
           } catch (err) {
             console.error("Failed to read file size:", err);
           }
 
           await prisma.attachment.create({
             data: {
-              name: url.split("/").pop() || "proof.png",
+              name: (url.split("?")[0].split("/").pop()) || "proof.png",
               url,
               size: fileSize,
               mimeType: "image/png",

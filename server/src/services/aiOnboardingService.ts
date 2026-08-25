@@ -1,6 +1,6 @@
-import fs from "fs";
 import path from "path";
 import { PDFParse } from "pdf-parse";
+import { readStoredFile } from "./storage.js";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -27,21 +27,21 @@ const defaultSummary = (): ProjectSummary => ({
   constraints: "General operational limits"
 });
 
-// Helper: read uploaded file from local uploads/ directory
 async function getUploadedFileContent(fileUrl: string): Promise<string> {
   try {
-    const filename = path.basename(fileUrl);
-    const filePath = path.join(process.cwd(), "uploads", filename);
-    if (fs.existsSync(filePath)) {
-      if (filename.toLowerCase().endsWith(".pdf")) {
-        const dataBuffer = fs.readFileSync(filePath);
-        const parser = new PDFParse({ data: dataBuffer });
-        const parsed = await parser.getText();
-        await parser.destroy();
-        return parsed.text || "";
-      }
-      return fs.readFileSync(filePath, "utf-8");
+    const dataBuffer = await readStoredFile(fileUrl);
+    if (!dataBuffer) {
+      return "";
     }
+
+    const filename = path.basename(fileUrl.split("?")[0] || fileUrl);
+    if (filename.toLowerCase().endsWith(".pdf")) {
+      const parser = new PDFParse({ data: dataBuffer });
+      const parsed = await parser.getText();
+      await parser.destroy();
+      return parsed.text || "";
+    }
+    return dataBuffer.toString("utf-8");
   } catch (error) {
     console.error("Failed to read uploaded file:", error);
   }

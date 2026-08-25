@@ -12,9 +12,18 @@ export function getJwtSecret(): string {
   return "kapetein-labs-development-secret-key";
 }
 
+const DEFAULT_ORIGINS = [
+  "http://localhost:5173",
+  "http://localhost:8080",
+  "https://www.proj.kapiteinlabs.com",
+  "https://proj.kapiteinlabs.com",
+];
+
 export function getAllowedOrigins(): string[] {
-  return (process.env.CLIENT_ORIGIN ?? "http://localhost:5173,http://localhost:8080")
+  const fromEnv = (process.env.CLIENT_ORIGIN ?? "")
     .split(",")
     .map((origin) => origin.trim())
     .filter(Boolean);
+
+  return [...new Set([...DEFAULT_ORIGINS, ...fromEnv])];
 }
