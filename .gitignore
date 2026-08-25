@@ -12,7 +12,6 @@ coverage
 .vercel
 .ssh-mux
 .venv
+.env.local
 
 # Runtime uploads (keep the folder)
-server/uploads/**
-!server/uploads/.gitkeep
