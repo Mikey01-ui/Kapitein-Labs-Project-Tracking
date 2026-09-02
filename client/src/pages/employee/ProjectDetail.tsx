@@ -9,8 +9,7 @@ import type { User } from "../../types";
 import { SkeletonLoader } from "../../components/ui/SkeletonLoader";
 import gsap from "gsap";
 import { formatDate, formatHours } from "../../utils/formatters";
-import { Calendar, Users, Shield, Clock, Plus, BarChart3, Activity, ChevronLeft, X, CheckCircle2, AlertCircle, Trash2, FolderKanban, Maximize2, Minimize2, FileText } from "lucide-react";
-import { ProjectContractModal } from "../../components/contract/ProjectContractModal";
+import { Calendar, Users, Shield, Clock, Plus, BarChart3, Activity, ChevronLeft, X, CheckCircle2, AlertCircle, Trash2, FolderKanban, Maximize2, Minimize2 } from "lucide-react";
 
 interface GanttItem {
   id: string;
@@ -38,7 +37,6 @@ export function ProjectDetail() {
   const [isEditMembersOpen, setIsEditMembersOpen] = useState(false);
   const [editingMemberIds, setEditingMemberIds] = useState<string[]>([]);
   const [isAddDropdownOpen, setIsAddDropdownOpen] = useState(false);
-  const [isContractModalOpen, setIsContractModalOpen] = useState(false);
   const [toast, setToast] = useState<{ show: boolean; message: string; type: "success" | "error" }>({
     show: false,
     message: "",
@@ -373,30 +371,6 @@ export function ProjectDetail() {
                   {project.status}
                 </span>
               </div>
-            </div>
-
-            {/* Project Contract Banner */}
-            <div className="mt-6 flex items-center justify-between rounded-xl bg-[#0B1220] border border-[#1B2A3F] p-4 flex-wrap gap-3">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-lg bg-[#00e5c8]/10 border border-[#00e5c8]/25 text-[#00e5c8]">
-                  <FileText size={18} />
-                </div>
-                <div>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-[#00e5c8] block">
-                    Legal Engagement Agreement
-                  </span>
-                  <span className="text-xs font-bold text-white block">
-                    Freelance Development Agreement &bull; $500.00 USD
-                  </span>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsContractModalOpen(true)}
-                className="text-xs font-bold text-navy hover:text-navy px-3.5 py-1.5 rounded-lg bg-[#00e5c8] hover:bg-[#00b8a2] transition flex items-center gap-1.5 shadow-md shadow-[#00e5c8]/10"
-              >
-                <span>View & Download Contract</span> &rarr;
-              </button>
             </div>
           </div>
 
@@ -854,15 +828,6 @@ export function ProjectDetail() {
               </Button>
             </Link>
 
-            <Button 
-              onClick={() => setIsContractModalOpen(true)}
-              variant="secondary" 
-              className="w-full flex items-center justify-center gap-2 border-[#00e5c8]/30 hover:border-[#00e5c8]/60 hover:bg-[#00e5c8]/10 text-[#00e5c8] transition-all font-bold"
-            >
-              <FileText size={16} className="text-[#00e5c8]" />
-              Project Agreement
-            </Button>
-
             {(user.role === "ADMIN" || user.role === "MANAGER" || project.managerId === user.id) && (
               <Link to={`/projects/${project.id}/hours`} className="block">
                 <Button variant="secondary" className="w-full flex items-center justify-center gap-2">
@@ -1162,13 +1127,6 @@ export function ProjectDetail() {
           </button>
         </div>
       )}
-
-      {/* Project Contract Modal */}
-      <ProjectContractModal
-        isOpen={isContractModalOpen}
-        onClose={() => setIsContractModalOpen(false)}
-        project={project}
-      />
     </PageShell>
   );
 }
