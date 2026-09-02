@@ -1,0 +1,242 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  OWNER
+  PROJECT_MANAGER
+  TEAM_MEMBER
+}
+
+enum ProjectStatus {
+  ACTIVE
+  ARCHIVED
+  COMPLETED
+}
+
+enum MilestoneStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  CANCELLED
+}
+
+model User {
+  id                String          @id @default(cuid())
+  name              String
+  email             String          @unique
+  passwordHash      String
+  role              UserRole        @default(TEAM_MEMBER)
+  roleId            String?
+  isActive          Boolean         @default(true)
+  isPending         Boolean         @default(false)
+  notificationEmail String?
+  phoneNumber       String?
+  location          String?
+  bio               String?
+  skills            String?
+  avatarUrl         String?
+  createdAt         DateTime        @default(now())
+
+  createdProjects   Project[]       @relation("CreatedProjects")
+  managedProjects   Project[]       @relation("ManagedProjects")
+  memberships       ProjectMember[]
+  assignedCards     KanbanCard[]    @relation("CardAssignees")
+  comments          Comment[]
+  attachments       Attachment[]
+  activityLogs      ActivityLog[]
+  notifications     Notification[]
+  sentInvitations   Invitation[]    @relation("SentInvitations")
+  roleLink          Role?           @relation(fields: [roleId], references: [id])
+}
+
+model Project {
+  id           String          @id @default(cuid())
+  name         String
+  clientName   String          @default("Direct Client")
+  description  String
+  startDate    DateTime        @default(now())
+  deadline     DateTime?
+  status       ProjectStatus   @default(ACTIVE)
+  createdById  String
+  managerId    String
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  createdBy    User            @relation("CreatedProjects", fields: [createdById], references: [id])
+  manager      User            @relation("ManagedProjects", fields: [managerId], references: [id])
+  members      ProjectMember[]
+  milestones   Milestone[]
+  columns      KanbanColumn[]
+  cards        KanbanCard[]
+  attachments  Attachment[]
+  activityLogs ActivityLog[]
+  invitations  Invitation[]
+}
+
+model ProjectMember {
+  id        String   @id @default(cuid())
+  projectId String
+  userId    String
+  joinedAt  DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+}
+
+model Milestone {
+  id          String          @id @default(cuid())
+  projectId   String
+  name        String
+  dueDate     DateTime
+  status      MilestoneStatus @default(PENDING)
+  completedAt DateTime?
+  notes       String?
+  project     Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model KanbanColumn {
+  id        String       @id @default(cuid())
+  projectId String
+  title     String
+  order     Int
+  project   Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  cards     KanbanCard[]
+}
+
+model KanbanCard {
+  id             String          @id @default(cuid())
+  columnId       String
+  projectId      String
+  title          String
+  description    String?
+  dueDate        DateTime?
+  priority       Priority        @default(MEDIUM)
+  order          Int
+  createdAt      DateTime        @default(now())
+
+  column         KanbanColumn    @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignees      User[]          @relation("CardAssignees")
+  comments       Comment[]
+  checklistItems ChecklistItem[]
+  attachments    Attachment[]
+  activityLogs   ActivityLog[]
+}
+
+model ChecklistItem {
+  id          String     @id @default(cuid())
+  cardId      String
+  title       String
+  isCompleted Boolean    @default(false)
+  order       Int
+  createdAt   DateTime   @default(now())
+  card        KanbanCard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+}
+
+model Comment {
+  id        String     @id @default(cuid())
+  cardId    String
+  userId    String
+  content   String
+  createdAt DateTime   @default(now())
+  card      KanbanCard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Attachment {
+  id           String      @id @default(cuid())
+  name         String
+  url          String
+  size         Int
+  mimeType     String?
+  uploadedById String
+  projectId    String?
+  cardId       String?
+  createdAt    DateTime    @default(now())
+
+  uploadedBy   User        @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+  project      Project?    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  card         KanbanCard? @relation(fields: [cardId], references: [id], onDelete: Cascade)
+}
+
+model ActivityLog {
+  id         String      @id @default(cuid())
+  userId     String
+  projectId  String?
+  cardId     String?
+  actionType String
+  details    String?
+  createdAt  DateTime    @default(now())
+
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project    Project?    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  card       KanbanCard? @relation(fields: [cardId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  recipientId String
+  title       String
+  message     String
+  isRead      Boolean  @default(false)
+  type        String
+  link        String?
+  createdAt   DateTime @default(now())
+
+  recipient   User     @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+}
+
+model Invitation {
+  id          String           @id @default(cuid())
+  email       String
+  role        UserRole         @default(PROJECT_MANAGER)
+  projectId   String?
+  token       String           @unique
+  expiresAt   DateTime
+  status      InvitationStatus @default(PENDING)
+  invitedById String
+  createdAt   DateTime         @default(now())
+
+  invitedBy   User             @relation("SentInvitations", fields: [invitedById], references: [id], onDelete: Cascade)
+  project     Project?         @relation(fields: [projectId], references: [id], onDelete: SetNull)
+}
+
+model Role {
+  id          String           @id @default(cuid())
+  name        String           @unique // "OWNER", "PROJECT_MANAGER", "TEAM_MEMBER"
+  users       User[]
+  permissions RolePermission[]
+}
+
+model Permission {
+  id    String           @id @default(cuid())
+  name  String           @unique // e.g. "CREATE_PROJECT", "MANAGE_TEAM", "ASSIGN_TASKS"
+  roles RolePermission[]
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}

@@ -1,0 +1,25 @@
+FROM node:20-bookworm-slim
+
+WORKDIR /app
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends openssl python3 make g++ \
+  && rm -rf /var/lib/apt/lists/*
+
+COPY package.json package-lock.json ./
+COPY client/package.json ./client/
+COPY server/package.json ./server/
+
+RUN npm ci
+
+COPY server ./server
+COPY deploy/api-entrypoint.sh /usr/local/bin/api-entrypoint.sh
+RUN chmod +x /usr/local/bin/api-entrypoint.sh
+
+RUN npx prisma generate --schema=server/prisma/schema.prisma \
+  && npm run build --workspace=server
+
+ENV NODE_ENV=production
+EXPOSE 4000
+
+ENTRYPOINT ["/usr/local/bin/api-entrypoint.sh"]

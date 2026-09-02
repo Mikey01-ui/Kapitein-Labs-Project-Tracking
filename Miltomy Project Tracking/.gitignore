@@ -1,0 +1,18 @@
+node_modules
+dist
+build
+.env
+.env.*
+!.env.example
+!**/.env.example
+.DS_Store
+coverage
+*.log
+*.tsbuildinfo
+.vercel
+.ssh-mux
+.venv
+
+# Runtime uploads (keep the folder)
+server/uploads/**
+!server/uploads/.gitkeep

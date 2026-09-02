@@ -600,7 +600,7 @@ export function MyTasks() {
         </div>
       )}
 
-      {/* Top Header Bar (1:1 with Kapitein Labs Header) */}
+      {/* Top Header Bar (1:1 with Miltomy Header) */}
       <div className="relative z-10 px-6 py-4 lg:pl-28 lg:pr-8 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#222222] border-dashed select-none bg-[#080808]/80 backdrop-blur-sm">
         <div>
           <p className="text-[10px] font-black uppercase tracking-widest text-[#888888]">
@@ -697,7 +697,7 @@ export function MyTasks() {
         </div>
       </div>
 
-      {/* Columns / Gantt Workspace Container (1:1 with Kapitein Labs) */}
+      {/* Columns / Gantt Workspace Container (1:1 with Miltomy) */}
       <div className="relative z-10 flex-grow p-6 lg:pl-28 lg:pr-8 flex flex-col">
         
         {activeView === "gantt" ? (
@@ -730,7 +730,7 @@ export function MyTasks() {
             </div>
           </div>
         ) : (
-          /* Kanban Board Columns (1:1 Kapitein Labs Columns Layout) */
+          /* Kanban Board Columns (1:1 Miltomy Columns Layout) */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 w-full items-start pb-8">
             {columns.map((column) => {
               const columnCards = filteredCardsForView.filter((card) => card.columnId === column.id);
@@ -804,7 +804,7 @@ export function MyTasks() {
                           onClick={() => setLargeDetailCardId(card.id)}
                           className="group relative rounded-[3px] bg-[#161616] hover:bg-[#1a1a1a] p-3 shadow-md border border-[#222222]/90 hover:border-[#c8ff00]/40 transition-all duration-150 cursor-grab active:cursor-grabbing select-none"
                         >
-                          {/* Row 1: Dual Priority Bars + Tag Pill (1:1 Kapitein Labs Card Anatomy) */}
+                          {/* Row 1: Dual Priority Bars + Tag Pill (1:1 Miltomy Card Anatomy) */}
                           <div className="flex items-center justify-between mb-1.5">
                             {/* Dual Priority Bars */}
                             <div className="flex items-center gap-1.5">
@@ -1009,7 +1009,7 @@ export function MyTasks() {
         </div>
       )}
 
-      {/* 1:1 KAPITEIN LABS TASK DETAIL MODAL */}
+      {/* MILTOMY TASK DETAIL MODAL */}
       {detailCard && (
         <div 
           className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-fade-in text-white"

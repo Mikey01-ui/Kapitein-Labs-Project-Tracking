@@ -763,7 +763,7 @@ export function KanbanBoard() {
         </div>
       )}
 
-      {/* 1:1 KAPITEIN LABS TASK DETAIL MODAL */}
+      {/* MILTOMY TASK DETAIL MODAL */}
       {detailCard && (
         <div 
           className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-fade-in text-white"

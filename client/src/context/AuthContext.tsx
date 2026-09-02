@@ -13,7 +13,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUserState] = useState<User | null>(() => {
-    const stored = localStorage.getItem("miltomy_current_user") || localStorage.getItem("kapetein_current_user");
+    const stored = localStorage.getItem("miltomy_current_user");
     if (stored) {
       try {
         return JSON.parse(stored);
@@ -28,23 +28,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const verifySession = async () => {
       const isPreview = window.location.search.includes("preview=true") || window.location.hash.includes("preview=true") || localStorage.getItem("miltomy_demo_mode") === "true";
       if (isPreview) {
-        const demoUser: User = {
-          id: "demo-user-milton",
-          name: "Milton (Demo Owner)",
-          email: "owner@miltomy.com",
+        setUserState({
+          id: "preview-admin",
+          name: "Milton Egbesola",
+          email: "miltomy@gmail.com",
           role: "OWNER",
           isActive: true,
-          createdAt: "2026-01-01T00:00:00.000Z"
-        };
-        localStorage.setItem("miltomy_demo_mode", "true");
-        localStorage.setItem("miltomy_token", "demo-token-12345");
-        setUserState(demoUser);
-        localStorage.setItem("miltomy_current_user", JSON.stringify(demoUser));
+          createdAt: new Date().toISOString()
+        });
         setLoading(false);
         return;
       }
 
-      const token = localStorage.getItem("miltomy_token") || localStorage.getItem("kapetein_token");
+      const token = localStorage.getItem("miltomy_token");
       if (!token) {
         setUserState(null);
         setLoading(false);
@@ -64,8 +60,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           localStorage.removeItem("miltomy_token");
           localStorage.removeItem("miltomy_current_user");
-          localStorage.removeItem("kapetein_token");
-          localStorage.removeItem("kapetein_current_user");
           setUserState(null);
         }
       } catch (e) {
@@ -86,14 +80,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem("miltomy_current_user");
       localStorage.removeItem("miltomy_token");
       localStorage.removeItem("miltomy_demo_mode");
-      localStorage.removeItem("kapetein_current_user");
-      localStorage.removeItem("kapetein_token");
     }
   };
 
   const login = (token: string, newUser: User) => {
     localStorage.setItem("miltomy_token", token);
-    localStorage.setItem("kapetein_token", token);
     setUser(newUser);
   };
 

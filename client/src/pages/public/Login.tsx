@@ -57,7 +57,7 @@ export function Login() {
     <main className="min-h-screen bg-[#080808] text-[#f0ede6]">
       <div className="grid min-h-screen lg:grid-cols-[1fr_1fr]">
         
-        {/* LEFT SECTION (Kapitein Labs Exact Sizing & Typography with Miltomy Colors) */}
+        {/* LEFT SECTION (Miltomy Exact Sizing & Typography with Miltomy Colors) */}
         <section className="relative hidden lg:flex min-h-[44rem] overflow-hidden bg-[#0c0c0c] px-8 py-10 sm:px-12 lg:min-h-screen lg:px-16 select-none">
           <div className="absolute -inset-48 rotate-45 scale-125 opacity-80">
             <ShapeGrid
@@ -95,7 +95,7 @@ export function Login() {
           </div>
         </section>
 
-        {/* RIGHT SECTION (Kapitein Labs Exact Box, Typography & Sizing) */}
+        {/* RIGHT SECTION (Miltomy Exact Box, Typography & Sizing) */}
         <section className="flex min-h-screen items-center justify-center bg-[#080808] px-6 py-12">
           <div className="w-full max-w-[31rem] rounded bg-[#111111] border border-[#222222] px-8 py-10 shadow-2xl shadow-black/40 sm:px-11 sm:py-12">
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#c8ff00]">
