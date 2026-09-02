@@ -20,7 +20,8 @@ import {
   Mic,
   Volume2,
   ArrowLeft,
-  ArrowUp
+  ArrowUp,
+  Loader2
 } from "lucide-react";
 import type { User } from "../../types";
 
@@ -110,7 +111,7 @@ export function AiOnboardingChat({ isOpen, onClose, onBack, inline = false, onPr
 
   // Default manager selection
   useEffect(() => {
-    const managers = usersList.filter(u => u.role === "MANAGER" || u.role === "ADMIN");
+    const managers = usersList.filter(u => u.role === "PROJECT_MANAGER" || u.role === "OWNER");
     if (managers.length > 0 && !projectManagerId) {
       setProjectManagerId(managers[0].id);
     }
@@ -376,7 +377,7 @@ export function AiOnboardingChat({ isOpen, onClose, onBack, inline = false, onPr
   };
 
   const renderInputContainer = (isLanding: boolean) => {
-    const isInputDisabled = !isLanding && showPlanReview;
+const isInputDisabled = !isLanding && showPlanReview;
     const placeholderText = isLanding 
       ? "Ask anything..." 
       : showPlanReview 
@@ -384,7 +385,7 @@ export function AiOnboardingChat({ isOpen, onClose, onBack, inline = false, onPr
       : "Ask anything...";
 
     return (
-      <div className="w-full bg-[#131b26]/90 border border-[#1b273d] focus-within:border-teal rounded-[24px] p-3 flex flex-col gap-2.5 shadow-2xl transition-all duration-300">
+      <div className="w-full bg-[#161616] border border-[#262626] focus-within:border-[#c8ff00] rounded p-3 flex flex-col gap-2.5 shadow-2xl transition-all duration-300">
         
         {/* File Previews inside the container */}
         {attachedFiles.length > 0 && (
@@ -395,12 +396,12 @@ export function AiOnboardingChat({ isOpen, onClose, onBack, inline = false, onPr
               return (
                 <div 
                   key={idx}
-                  className={`flex items-center gap-2.5 bg-[#1a2332] border border-[#253347] rounded-xl p-2.5 pr-8 min-w-[200px] max-w-[260px] relative transition-all duration-200 ${
+                  className={`flex items-center gap-2.5 bg-[#111111] border border-[#222222] rounded p-2.5 pr-8 min-w-[200px] max-w-[260px] relative transition-all duration-200 ${
                     file.status === "uploading" || file.status === "analyzing" ? "animate-pulse" : ""
                   }`}
                 >
                   {/* Red icon square */}
-                  <div className="w-7 h-7 bg-[#ef4444] rounded-lg flex items-center justify-center text-white font-black text-[9px] shrink-0 shadow-md">
+                  <div className="w-7 h-7 bg-[#ef4444] rounded flex items-center justify-center text-white font-black text-[9px] shrink-0 shadow-md">
                     {ext === "PDF" ? (
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -415,18 +416,18 @@ export function AiOnboardingChat({ isOpen, onClose, onBack, inline = false, onPr
                   {/* File Info */}
                   <div className="flex flex-col min-w-0">
                     <span className="text-[10px] font-black text-white truncate max-w-[130px]">{file.name}</span>
-                    <span className="text-[8px] text-[#8e9cae] uppercase font-black tracking-wider">
+                    <span className="text-[8px] text-[#888888] uppercase font-black tracking-wider">
                       {file.status === "uploading" ? "Uploading..." : file.status === "analyzing" ? "Scanning..." : ext}
                     </span>
                   </div>
 
-                  {/* Remove Button - styled as white X on black circle */}
+                  {/* Delete button */}
                   <button
                     type="button"
                     onClick={() => handleRemoveFile(idx)}
-                    className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-black border border-[#253347] text-white hover:text-red-400 flex items-center justify-center transition cursor-pointer"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[#888888] hover:text-[#ef4444] transition"
                   >
-                    <X size={10} strokeWidth={3} />
+                    <X size={13} />
                   </button>
                 </div>
               );
@@ -434,11 +435,13 @@ export function AiOnboardingChat({ isOpen, onClose, onBack, inline = false, onPr
           </div>
         )}
 
-        {/* Input Controls Row */}
-        <div className="flex items-center w-full gap-2">
-          {/* Plus button to add files */}
-          <label className="flex items-center justify-center p-1.5 rounded-full text-[#8e9cae] hover:text-white hover:bg-white/5 transition cursor-pointer select-none shrink-0 active:scale-95">
-            <Plus size={18} strokeWidth={2.5} />
+        <div className="flex items-center gap-3">
+          {/* File Upload trigger */}
+          <label
+            className="p-2 text-[#888888] hover:text-[#c8ff00] transition rounded hover:bg-[#222222] flex items-center justify-center shrink-0 cursor-pointer"
+            title="Attach specification doc (PDF, Text)"
+          >
+            <Paperclip size={18} />
             <input 
               type="file" 
               className="hidden" 
@@ -448,41 +451,41 @@ export function AiOnboardingChat({ isOpen, onClose, onBack, inline = false, onPr
             />
           </label>
 
-          {/* Text Input */}
+          {/* Chat input */}
           <input
             type="text"
             value={inputMessage}
             onChange={e => setInputMessage(e.target.value)}
             disabled={isInputDisabled}
             placeholder={placeholderText}
-            className="flex-1 bg-transparent text-[11px] text-white outline-none placeholder:text-[#8e9cae]/50 font-semibold py-1.5 px-0.5 disabled:opacity-40"
+            className="flex-1 bg-transparent text-xs text-white placeholder:text-[#888888] focus:outline-none font-medium"
           />
 
-          {/* Microphone Icon */}
-          <button
-            type="button"
-            onClick={() => {
-              if (isLanding) {
-                setInputMessage("Build a software engineering portal for data tracking.");
-              } else {
-                setInputMessage("Add task to analyze carbon deposit profiles.");
-              }
-            }}
-            className="p-1.5 text-[#8e9cae] hover:text-white hover:bg-white/5 rounded-full transition active:scale-95 disabled:opacity-40"
-            disabled={isInputDisabled}
-            title="Voice input simulation"
-          >
-            <Mic size={16} />
-          </button>
-
-          {/* Send Button (White circle, black up arrow) */}
-          <button 
-            type="submit"
-            disabled={isInputDisabled || (!inputMessage.trim() && attachedFiles.length === 0)}
-            className="w-7 h-7 rounded-full bg-white text-black hover:bg-gray-200 flex items-center justify-center shrink-0 transition active:scale-95 disabled:bg-white/10 disabled:text-white/40 cursor-pointer"
-          >
-            <ArrowUp size={14} strokeWidth={3} />
-          </button>
+          {/* Send / Mic button */}
+          {inputMessage.trim() || attachedFiles.length > 0 ? (
+            <button
+              type="submit"
+              disabled={isLoading || isInputDisabled}
+              className="p-2.5 bg-[#c8ff00] text-[#080808] hover:bg-[#b2e600] disabled:opacity-50 transition rounded flex items-center justify-center shrink-0 shadow-lg shadow-[#c8ff00]/20"
+            >
+              {isLoading ? <Loader2 size={16} className="animate-spin" /> : <ArrowUp size={16} />}
+            </button>
+          ) : (
+            <button
+              type="button"
+              disabled={isInputDisabled}
+              onClick={() => {
+                if (isLanding) {
+                  setInputMessage("Build a software engineering portal for data tracking.");
+                } else {
+                  setInputMessage("Add task to analyze carbon deposit profiles.");
+                }
+              }}
+              className="p-2 text-[#888888] hover:text-white transition rounded hover:bg-[#222222] flex items-center justify-center shrink-0"
+            >
+              <Mic size={18} />
+            </button>
+          )}
         </div>
       </div>
     );
@@ -490,62 +493,8 @@ export function AiOnboardingChat({ isOpen, onClose, onBack, inline = false, onPr
 
   const mainContent = (
     <div 
-      className="relative w-full h-full bg-[#0c1322] flex flex-col overflow-hidden"
-      onDragOver={handleDragOver}
+      className="relative w-full h-full bg-[#0c0c0c] flex flex-col overflow-hidden select-none"
     >
-      
-      {/* Toast Alert */}
-      {toast.show && (
-        <div className={`fixed top-4 right-4 z-[10000] flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg border text-xs font-semibold animate-slide-in ${
-          toast.type === "success" 
-            ? "bg-emerald-950/80 border-emerald-500/30 text-emerald-400" 
-            : "bg-red-950/80 border-red-500/30 text-red-400"
-        }`}>
-          {toast.type === "success" ? <CheckCircle2 size={14} /> : <AlertCircle size={14} />}
-          <span>{toast.message}</span>
-        </div>
-      )}
-
-      {/* Drop Zone Overlay */}
-      {isDragging && (
-        <div 
-          className="absolute inset-0 bg-[#00e5c8]/5 border-2 border-dashed border-[#00e5c8] z-[100] flex items-center justify-center transition-all duration-200"
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-        >
-          <div className="text-center space-y-2 pointer-events-none">
-            <UploadCloud size={48} className="text-[#00e5c8] mx-auto animate-bounce" />
-            <h4 className="text-sm font-bold uppercase tracking-wider text-[#00e5c8]">Drop Document to Attach</h4>
-            <p className="text-[10px] text-text-muted">Acknowledge research proposals, spreadsheets, or specs</p>
-          </div>
-        </div>
-      )}
-
-      {/* Header */}
-      <div className="p-5 border-b border-[#1b273d] bg-[#070c16] flex items-center justify-between">
-        <button
-          type="button"
-          onClick={onBack || onClose}
-          className="p-2 rounded bg-[#1A2B42]/40 hover:bg-[#1A2B42] text-teal hover:text-white border border-[#253347] transition active:scale-95 flex items-center justify-center"
-          aria-label="Go back"
-        >
-          <ArrowLeft size={16} />
-        </button>
-
-        {/* Close Button */}
-        <button 
-          onClick={onClose}
-          className="text-text-muted hover:text-white transition p-1.5 hover:bg-[#1b273d] rounded flex items-center justify-center"
-          aria-label="Close"
-        >
-          <X size={16} />
-        </button>
-      </div>
-
-
-
-
 
       {/* Messages Feed Area or Landing Page */}
       {messages.length === 0 ? (
@@ -724,7 +673,7 @@ export function AiOnboardingChat({ isOpen, onClose, onBack, inline = false, onPr
                               onChange={e => setProjectManagerId(e.target.value)}
                               className="w-full h-8 rounded bg-[#050910] border border-[#1b273d] px-2 text-[10px] font-bold text-white uppercase outline-none focus:border-teal transition cursor-pointer"
                             >
-                              {usersList.filter(u => u.role === "MANAGER" || u.role === "ADMIN").map(u => (
+                              {usersList.filter(u => u.role === "PROJECT_MANAGER" || u.role === "OWNER").map(u => (
                                 <option key={u.id} value={u.id}>{u.name}</option>
                               ))}
                             </select>

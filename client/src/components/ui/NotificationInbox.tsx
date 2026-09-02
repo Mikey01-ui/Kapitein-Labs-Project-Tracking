@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { Bell, Check, Trash2, ExternalLink, Inbox, X } from "lucide-react";
+import { Bell, Check, ExternalLink, Inbox, X } from "lucide-react";
 import { apiRequest } from "../../services/apiClient";
 import { useAuth } from "../../context/AuthContext";
 
@@ -24,7 +24,7 @@ export function NotificationInbox() {
   const fetchNotifications = async () => {
     try {
       const data = await apiRequest<{ notifications: Notification[] }>("/notifications");
-      setNotifications(data.notifications);
+      setNotifications(data.notifications || []);
     } catch (err) {
       console.error("Failed to fetch notifications:", err);
     }
@@ -33,20 +33,17 @@ export function NotificationInbox() {
   useEffect(() => {
     if (user) {
       fetchNotifications();
-      // Poll notifications every 3 seconds
-      const interval = setInterval(fetchNotifications, 3000);
+      const interval = setInterval(fetchNotifications, 5000);
       return () => clearInterval(interval);
     }
   }, [user]);
 
-  // Instantly refetch when the sidebar is opened
   useEffect(() => {
     if (isOpen && user) {
       fetchNotifications();
     }
   }, [isOpen, user]);
 
-  // Click outside listener to close sidebar
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (isOpen && sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
@@ -102,21 +99,20 @@ export function NotificationInbox() {
       {/* Bell Button Icon Trigger */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="bell-button-trigger relative p-2 text-text-muted hover:text-white transition-colors duration-150 rounded-full hover:bg-white/5 focus:outline-none"
+        className="bell-button-trigger relative p-2 text-[#888888] hover:text-white transition-colors duration-150 rounded-full hover:bg-white/5 focus:outline-none cursor-pointer"
         title="Notifications"
       >
-        <Bell size={20} className={unreadCount > 0 ? "text-teal animate-pulse-slow" : "text-text-muted"} />
+        <Bell size={20} className={unreadCount > 0 ? "text-[#c8ff00] animate-pulse-slow" : "text-[#888888]"} />
         {unreadCount > 0 && (
-          <span className="absolute top-0.5 right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-teal text-[9px] font-black text-navy shadow-md">
+          <span className="absolute top-0.5 right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#c8ff00] text-[9px] font-black text-[#080808] shadow-md">
             {unreadCount}
           </span>
         )}
       </button>
 
-      {/* Render the drawer and backdrop inside a React Portal (mounted directly to document.body) */}
+      {/* Render the drawer and backdrop inside React Portal */}
       {createPortal(
         <>
-          {/* Backdrop Overlay */}
           {isOpen && (
             <div 
               onClick={() => setIsOpen(false)}
@@ -124,24 +120,23 @@ export function NotificationInbox() {
             />
           )}
 
-          {/* Notifications Sliding Sidebar Panel */}
           <div
             ref={sidebarRef}
-            className={`fixed top-0 right-0 h-full w-80 md:w-96 bg-[#121E30] border-l border-dashed border-[#253347] z-[9995] shadow-2xl flex flex-col transition-transform duration-300 ease-out notifications-panel ${
+            className={`fixed top-0 right-0 h-full w-80 md:w-96 bg-[#111111] border-l border-dashed border-[#222222] z-[9995] shadow-2xl flex flex-col transition-transform duration-300 ease-out ${
               isOpen ? "translate-x-0" : "translate-x-full"
             }`}
           >
             {/* Header */}
-            <div className="px-5 py-4 bg-[#0c1421] border-b border-dashed border-[#253347] flex items-center justify-between flex-shrink-0 notifications-panel-header">
+            <div className="px-5 py-4 bg-[#0c0c0c] border-b border-dashed border-[#222222] flex items-center justify-between flex-shrink-0">
               <span className="text-xs font-black uppercase tracking-wider text-white flex items-center gap-2">
-                <Bell size={13} className="text-teal" />
+                <Bell size={13} className="text-[#c8ff00]" />
                 Notifications Panel
               </span>
               <div className="flex items-center gap-3">
                 {unreadCount > 0 && (
                   <button
                     onClick={handleMarkAllAsRead}
-                    className="text-[10px] font-black uppercase tracking-wider text-teal hover:underline flex items-center gap-1 transition"
+                    className="text-[10px] font-black uppercase tracking-wider text-[#c8ff00] hover:underline flex items-center gap-1 transition cursor-pointer"
                   >
                     <Check size={10} />
                     Mark all as read
@@ -149,7 +144,7 @@ export function NotificationInbox() {
                 )}
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="p-1.5 text-text-muted hover:text-white rounded hover:bg-white/5 transition focus:outline-none"
+                  className="p-1.5 text-[#888888] hover:text-white rounded hover:bg-white/5 transition focus:outline-none cursor-pointer"
                   title="Close Sidebar"
                 >
                   <X size={15} />
@@ -158,37 +153,36 @@ export function NotificationInbox() {
             </div>
 
             {/* Scrollable Feed */}
-            <div className="flex-1 overflow-y-auto planka-scrollbar">
+            <div className="flex-1 overflow-y-auto">
               {notifications.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-center text-text-muted/60 p-6">
-                  <Inbox size={36} className="mb-2 text-text-muted/40" />
-                  <p className="text-xs font-semibold">All caught up!</p>
-                  <p className="text-[10px] mt-0.5">You have no new notifications.</p>
+                <div className="h-full flex flex-col items-center justify-center text-center text-[#888888]/60 p-6">
+                  <Inbox size={36} className="mb-2 text-[#888888]/40" />
+                  <p className="text-xs font-semibold text-[#888888]">All caught up!</p>
+                  <p className="text-[10px] text-[#666666] mt-0.5">You have no new notifications.</p>
                 </div>
               ) : (
-                <div className="divide-y divide-[#253347]/50">
+                <div className="divide-y divide-[#222222]">
                   {notifications.map((notification) => (
                     <div
                       key={notification.id}
-                      className={`p-5 flex flex-col gap-1 transition-colors relative group notifications-feed-item ${
-                        notification.isRead ? "bg-transparent hover:bg-white/5" : "bg-teal/5 hover:bg-teal/10"
+                      className={`p-5 flex flex-col gap-1 transition-colors relative group ${
+                        notification.isRead ? "bg-transparent hover:bg-white/5" : "bg-[#c8ff00]/5 hover:bg-[#c8ff00]/10"
                       }`}
                     >
-                      {/* Read Dot Indicator */}
                       {!notification.isRead && (
-                        <span className="absolute top-5 left-2.5 h-1.5 w-1.5 rounded-full bg-teal" />
+                        <span className="absolute top-5 left-2.5 h-1.5 w-1.5 rounded-full bg-[#c8ff00]" />
                       )}
 
                       <div className="pl-3.5 pr-8 flex flex-col gap-0.5">
                         <div className="flex items-start justify-between gap-3">
-                          <span className="text-xs font-bold text-white leading-tight notifications-feed-item-title">
+                          <span className="text-xs font-bold text-white leading-tight">
                             {notification.title}
                           </span>
-                          <span className="text-[9px] text-text-muted font-bold whitespace-nowrap flex-shrink-0 mt-0.5">
+                          <span className="text-[9px] text-[#888888] font-bold whitespace-nowrap flex-shrink-0 mt-0.5">
                             {getRelativeTime(notification.createdAt)}
                           </span>
                         </div>
-                        <p className="text-[11px] text-text-muted leading-relaxed mt-1 notifications-feed-item-message">
+                        <p className="text-[11px] text-[#888888] leading-relaxed mt-1">
                           {notification.message}
                         </p>
 
@@ -196,7 +190,7 @@ export function NotificationInbox() {
                           <a
                             href={notification.link}
                             onClick={() => setIsOpen(false)}
-                            className="mt-2 text-[9px] font-black uppercase tracking-wider text-teal hover:underline flex items-center gap-0.5 w-fit"
+                            className="mt-2 text-[9px] font-black uppercase tracking-wider text-[#c8ff00] hover:underline flex items-center gap-0.5 w-fit"
                           >
                             View Details
                             <ExternalLink size={8} />
@@ -204,12 +198,11 @@ export function NotificationInbox() {
                         )}
                       </div>
 
-                      {/* Actions overlay */}
                       {!notification.isRead && (
                         <div className="absolute right-4 top-4 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={(e) => handleMarkAsRead(notification.id, e)}
-                            className="p-1 text-text-muted hover:text-teal rounded hover:bg-white/5 transition focus:outline-none"
+                            className="p-1 text-[#888888] hover:text-[#c8ff00] rounded hover:bg-white/5 transition focus:outline-none cursor-pointer"
                             title="Mark as read"
                           >
                             <Check size={12} />

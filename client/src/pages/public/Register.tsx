@@ -1,24 +1,21 @@
 import { useState } from "react";
-import { ArrowLeft, CheckCircle2, AlertCircle } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Eye, EyeOff, AlertCircle, Loader2 } from "lucide-react";
 import ShapeGrid from "../../components/effects/ShapeGrid";
-import type { User, UserRole } from "../../types";
+import { useAuth } from "../../context/AuthContext";
+import { UserRole } from "../../types";
 
 export function Register() {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [selectedRole, setSelectedRole] = useState<UserRole>("EMPLOYEE");
   const [password, setPassword] = useState("");
-  const [isRegistered, setIsRegistered] = useState(false);
+  const [role, setRole] = useState<UserRole>("PROJECT_MANAGER");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-
-  const handleAutoGeneratePassword = () => {
-    const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
-    let generatedPassword = "";
-    for (let i = 0; i < 12; i++) {
-      generatedPassword += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    setPassword(generatedPassword);
-  };
+  const [loading, setLoading] = useState(false);
 
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,11 +26,7 @@ export function Register() {
       return;
     }
 
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(email)) {
-      setError("Please enter a valid email address.");
-      return;
-    }
+    setLoading(true);
 
     try {
       const res = await fetch("/api/auth/register", {
@@ -45,185 +38,185 @@ export function Register() {
           name: fullName.trim(),
           email: email.trim().toLowerCase(),
           password: password.trim(),
-          role: selectedRole
+          role: role
         })
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.message || "Failed to submit registration.");
+        setError(data.message || "Failed to create account.");
+        setLoading(false);
         return;
       }
 
-      setIsRegistered(true);
+      if (data.token) {
+        login(data.token, data.user);
+        navigate("/dashboard");
+      } else {
+        navigate("/login");
+      }
     } catch (err) {
       console.error("Register request error:", err);
       setError("Failed to connect to authentication server.");
+      setLoading(false);
     }
   };
 
-  const isPreview = typeof window !== "undefined" && (window.location.search.includes("preview=true") || window.location.hash.includes("preview=true") || localStorage.getItem("kapetein_demo_mode") === "true");
-
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-[#080f1f] px-6 py-6 text-text-primary sm:px-8 sm:py-8 select-none">
-      <div className="absolute -inset-48 rotate-45 scale-125 opacity-80">
-        <ShapeGrid
-          speed={0.5}
-          squareSize={40}
-          direction="diagonal"
-          borderColor="#2F293A"
-          hoverFillColor="#00C88A33"
-          hoverColor="#00C88A33"
-          size={40}
-          shape="square"
-          hoverTrailAmount={8}
-        />
-      </div>
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(18,30,48,0.12),rgba(8,15,31,0.45)_60%,rgba(8,15,31,0.75))]" />
-
-      <header className="relative z-10 flex items-center justify-between">
-        <p className="text-xl font-black tracking-tight sm:text-2xl">
-          {isPreview ? (
-            <>Project<span className="text-teal">Tracker</span></>
-          ) : (
-            <>Kapitein<span className="text-teal">Labs</span></>
-          )}
-        </p>
-        <a className="flex items-center gap-2 text-sm font-semibold text-teal transition hover:text-teal-deep" href="/login">
-          <ArrowLeft size={17} />
-          Back to Login
-        </a>
-      </header>
-
-      <div className="pointer-events-none relative z-10 flex flex-grow items-center justify-center py-4">
-        <section className="pointer-events-auto w-full max-w-[32rem] rounded bg-[#111d30] px-6 py-6 shadow-2xl shadow-black/20 sm:px-8 sm:py-7">
+    <main className="min-h-screen bg-[#080808] text-[#f0ede6]">
+      <div className="grid min-h-screen lg:grid-cols-[1fr_1fr]">
+        
+        {/* LEFT HERO SECTION */}
+        <section className="relative hidden lg:flex min-h-[44rem] overflow-hidden bg-[#0c0c0c] px-8 py-10 sm:px-12 lg:min-h-screen lg:px-16 select-none">
+          <div className="absolute -inset-48 rotate-45 scale-125 opacity-80">
+            <ShapeGrid
+              speed={0.5}
+              squareSize={40}
+              direction="diagonal"
+              borderColor="#1f1f1f"
+              hoverFillColor="#c8ff0033"
+              hoverColor="#c8ff0033"
+              size={40}
+              shape="square"
+              hoverTrailAmount={8}
+            />
+          </div>
           
-          {isRegistered ? (
-            <div className="text-center space-y-5 py-4 select-none">
-              <div className="flex justify-center text-teal">
-                <CheckCircle2 size={54} className="animate-pulse" />
-              </div>
-              <div className="space-y-2">
-                <h2 className="text-xl font-bold text-white tracking-normal sm:text-2xl">
-                  Registration Submitted!
-                </h2>
-                <p className="text-xs text-text-muted max-w-sm mx-auto leading-relaxed">
-                  Your registration request for <span className="text-teal font-semibold">{fullName}</span> has been received. 
-                  An administrator must approve and activate your account before you can log in.
-                </p>
-              </div>
-              <div className="pt-4 border-t border-[#26364d] border-dashed">
-                <a 
-                  href="/login" 
-                  className="inline-flex h-11 items-center justify-center px-6 rounded bg-teal text-xs font-black uppercase tracking-[0.22em] text-[#061422] transition hover:bg-teal-deep"
-                >
-                  Return to Login
-                </a>
-              </div>
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(8,8,8,0)_0%,rgba(8,8,8,0.2)_68%,#080808_100%)]" />
+
+          <div className="pointer-events-none relative z-10 flex min-h-full w-full flex-col justify-between">
+            <p className="text-2xl font-black tracking-tight sm:text-3xl">
+              Miltomy<span className="text-[#c8ff00]">.</span>
+            </p>
+
+            <div className="max-w-2xl pb-16">
+              <h1 className="text-4xl font-light leading-none tracking-normal text-white sm:text-5xl xl:text-6xl">
+                Create Agency Account
+              </h1>
+              <p className="mt-5 text-xs font-semibold uppercase tracking-[0.28em] text-[#888888] sm:text-sm">
+                Agency Client & Project Intelligence Platform
+              </p>
             </div>
-          ) : (
-            <>
-              <p className="text-xs font-bold uppercase tracking-[0.24em] text-teal">Onboarding Request</p>
-              <h1 className="mt-3 text-xl font-bold tracking-normal text-white sm:text-2xl">Create New Account</h1>
-              <div className="my-4 h-px bg-[#26364d]" />
 
-              {error && (
-                <div className="flex items-center gap-2 p-3 mb-4 rounded bg-[#2D1E1E]/50 border border-red-500/20 text-[#E74C4C] text-xs font-semibold select-none">
-                  <AlertCircle size={14} />
-                  <span>{error}</span>
-                </div>
-              )}
-
-              <form onSubmit={handleRegisterSubmit} className="space-y-4">
-                <label className="block">
-                  <span className="text-xs font-black uppercase tracking-[0.22em] text-text-muted">Full Name</span>
-                  <input
-                    className="mt-2 h-11 w-full border border-transparent border-b-[#2a3a52] bg-[#08101f] px-4 text-sm font-semibold text-white outline-none transition placeholder:text-[#8f98aa] focus:border-teal"
-                    placeholder="John Smith"
-                    autoComplete="name"
-                    required
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                  />
-                </label>
-
-                <label className="block">
-                  <span className="text-xs font-black uppercase tracking-[0.22em] text-text-muted">Email Address</span>
-                  <input
-                    className="mt-2 h-11 w-full border border-transparent border-b-[#2a3a52] bg-[#08101f] px-4 text-sm font-semibold text-white outline-none transition placeholder:text-[#8f98aa] focus:border-teal"
-                    placeholder="jsmith@kapiteinlabs.local"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </label>
-
-                <fieldset>
-                  <legend className="text-xs font-black uppercase tracking-[0.22em] text-text-muted">Requested Role</legend>
-                  <div className="mt-2 grid grid-cols-3 border border-[#26364d]">
-                    {[
-                      { label: "Employee", value: "EMPLOYEE" },
-                      { label: "Manager", value: "MANAGER" },
-                      { label: "Admin", value: "ADMIN" }
-                    ].map((role) => (
-                      <label
-                        key={role.value}
-                        className={`relative flex h-11 cursor-pointer items-center justify-center text-xs font-bold transition ${
-                          selectedRole === role.value ? "bg-teal text-[#061422]" : "bg-transparent text-text-muted hover:bg-navy-elevated hover:text-white"
-                        }`}
-                      >
-                        <input
-                          className="sr-only"
-                          type="radio"
-                          name="role"
-                          checked={selectedRole === role.value}
-                          onChange={() => setSelectedRole(role.value as UserRole)}
-                        />
-                        {role.label}
-                      </label>
-                    ))}
-                  </div>
-                </fieldset>
-
-                <label className="block">
-                  <span className="text-xs font-black uppercase tracking-[0.22em] text-text-muted">Password</span>
-                  <div className="mt-2 grid gap-3 sm:grid-cols-[1fr_8.5rem]">
-                    <input
-                      className="h-11 w-full border border-transparent border-b-[#2a3a52] bg-[#08101f] px-4 text-sm font-semibold text-white outline-none transition placeholder:text-[#8f98aa] focus:border-teal"
-                      placeholder="Enter or auto-generate"
-                      type="text"
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <button
-                      className="h-11 border border-teal px-3 text-xs font-black uppercase tracking-[0.12em] text-teal transition hover:bg-teal hover:text-[#061422]"
-                      type="button"
-                      onClick={handleAutoGeneratePassword}
-                    >
-                      Auto-generate
-                    </button>
-                  </div>
-                </label>
-
-                <div className="border-l-4 border-teal bg-[#1a2d48]/40 px-4 py-2.5 text-[10px] font-semibold text-text-muted leading-relaxed">
-                  Important: Your account registration is pending admin review. You can only log in once an administrator approves your request.
-                </div>
-
-                <button
-                  className="mt-4 h-11 w-full rounded bg-teal text-xs font-black uppercase tracking-[0.22em] text-[#061422] transition hover:bg-teal-deep"
-                  type="submit"
-                >
-                  Submit Registration
-                </button>
-              </form>
-            </>
-          )}
+            <p className="text-sm font-semibold text-[#888888]">
+              Trusted by the Miltomy team & client partners
+            </p>
+          </div>
         </section>
+
+        {/* RIGHT SECTION: Register Form Card */}
+        <section className="flex min-h-screen items-center justify-center bg-[#080808] px-6 py-12">
+          <div className="w-full max-w-[31rem] rounded bg-[#111111] border border-[#222222] px-8 py-10 shadow-2xl shadow-black/40 sm:px-11 sm:py-12">
+            <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#c8ff00]">
+              Get Started
+            </p>
+            <h2 className="mt-5 text-2xl font-bold tracking-normal text-white">
+              Create your account
+            </h2>
+
+            {error && (
+              <div className="relative overflow-hidden mt-6 rounded border border-red-500/20 bg-gradient-to-r from-red-500/10 to-rose-500/5 p-4 backdrop-blur-md shadow-lg shadow-red-950/20 select-none animate-fade-in">
+                <div className="flex gap-3 items-start">
+                  <div className="flex-shrink-0 mt-0.5 relative">
+                    <div className="absolute inset-0 bg-red-500/20 rounded-full scale-125 animate-ping opacity-60" />
+                    <div className="relative p-1.5 rounded bg-red-500/10 border border-red-500/20 text-[#FF4F4F]">
+                      <AlertCircle size={15} />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <h4 className="text-xs font-bold text-white tracking-wide">
+                      Registration Error
+                    </h4>
+                    <p className="text-[11px] leading-relaxed text-[#FF9E9E] font-medium opacity-90">
+                      {error}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <form onSubmit={handleRegisterSubmit} className="mt-6 space-y-6">
+              <div>
+                <input
+                  className="h-14 w-full rounded border border-[#262626] bg-[#161616] px-4 text-base font-semibold text-white outline-none transition placeholder:text-[#888888] focus:border-[#c8ff00]"
+                  type="text"
+                  placeholder="Full Name"
+                  required
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <input
+                  className="h-14 w-full rounded border border-[#262626] bg-[#161616] px-4 text-base font-semibold text-white outline-none transition placeholder:text-[#888888] focus:border-[#c8ff00]"
+                  type="email"
+                  placeholder="Email address"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value as UserRole)}
+                  className="h-14 w-full rounded border border-[#262626] bg-[#161616] px-4 text-base font-semibold text-white outline-none transition focus:border-[#c8ff00] cursor-pointer"
+                >
+                  <option value="PROJECT_MANAGER">Project Manager</option>
+                  <option value="TEAM_MEMBER">Team Member</option>
+                </select>
+              </div>
+
+              <div className="relative">
+                <input
+                  className="h-14 w-full rounded border border-[#262626] bg-[#161616] px-4 pr-12 text-base font-semibold text-white outline-none transition placeholder:text-[#888888] focus:border-[#c8ff00]"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center text-[#888888] transition hover:text-white cursor-pointer"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+
+              <button
+                disabled={loading}
+                className="h-14 w-full rounded bg-[#c8ff00] text-xs font-black uppercase tracking-[0.22em] text-[#080808] transition hover:bg-[#b2e600] flex items-center justify-center cursor-pointer shadow-lg shadow-[#c8ff00]/15"
+                type="submit"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    <span>Creating Account...</span>
+                  </>
+                ) : (
+                  <span>Create Account</span>
+                )}
+              </button>
+            </form>
+
+            <p className="mt-10 text-center text-sm font-semibold text-[#888888] select-none">
+              Already have an account?{" "}
+              <Link to="/login" className="text-[#c8ff00] font-bold transition hover:text-[#b2e600] hover:underline">
+                Sign in here
+              </Link>
+            </p>
+          </div>
+        </section>
+
       </div>
-    </div>
+    </main>
   );
 }

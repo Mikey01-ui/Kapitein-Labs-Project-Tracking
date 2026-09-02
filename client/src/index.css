@@ -1,38 +1,24 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --color-bg-page: #0B1220;
-  --color-bg-surface: #121E30;
-  --color-bg-elevated: #1A2B42;
-  --color-teal: #00E5C8;
-  --color-teal-deep: #00B8A2;
-  --color-text-primary: #FFFFFF;
-  --color-text-muted: #B0BEC5;
-  --color-border: #253347;
+  --color-bg-page: #080808;
+  --color-bg-surface: #111111;
+  --color-bg-elevated: #161616;
+  --color-teal: #c8ff00;
+  --color-teal-deep: #b2e600;
+  --color-accent: #c8ff00;
+  --color-accent-deep: #b2e600;
+  --color-text-primary: #f0ede6;
+  --color-text-muted: #888888;
+  --color-border: #222222;
   --color-success: #00C88A;
   --color-warning: #F5A623;
   --color-danger: #E74C4C;
-  --color-neutral: #6B7A99;
-}
-
-/* Light Neumorphism Mode variables */
-html.light {
-  --color-bg-page: #E7E5E4;
-  --color-bg-surface: #E7E5E4;
-  --color-bg-elevated: #F1F2F5;
-  --color-teal: #006666;
-  --color-teal-deep: #004d4d;
-  --color-text-primary: #1E2938;
-  --color-text-muted: #4B5563;
-  --color-border: #D1D5DB;
-  --color-success: #00A63D;
-  --color-warning: #FE9900;
-  --color-danger: #FF2157;
-  --color-neutral: #6B7280;
+  --color-neutral: #666666;
 }
 
 * {
@@ -46,6 +32,7 @@ body {
   background: var(--color-bg-page);
   color: var(--color-text-primary);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  overflow-x: hidden;
 }
 
 a {
@@ -55,8 +42,8 @@ a {
 
 /* Premium Custom Scrollbars */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -64,529 +51,23 @@ a {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-bg-elevated);
+  background: #222222;
   border-radius: 9999px;
-  border: 2px solid var(--color-bg-page);
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-teal);
 }
 
-/* Firefox compatibility */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--color-bg-elevated) var(--color-bg-page);
+  scrollbar-color: #222222 var(--color-bg-page);
 }
 
-/* ==========================================================================
-   NEUMORPHISM LIGHT THEME OVERRIDES
-   ========================================================================== */
-
-/* Typography Rules */
-html.light body,
-html.light input,
-html.light select,
-html.light textarea,
-html.light button {
-  font-family: 'Space Mono', monospace !important;
-}
-
-html.light code,
-html.light pre,
-html.light .font-mono {
-  font-family: 'JetBrains Mono', monospace !important;
-}
-
-/* Disable/Hide WebGL Ferrofluid Spikes background canvas */
-html.light canvas {
-  display: none !important;
-}
-
-/* Monochromatic Surface & Background Overrides */
-html.light,
-html.light body,
-html.light #root,
-html.light .min-h-screen,
-html.light .bg-navy,
-html.light [class*="bg-navy"],
-html.light [class*="bg-[#0B1220]"],
-html.light [class*="bg-[#121E30]"],
-html.light [class*="bg-[#1A2B42]"],
-html.light [class*="bg-[#121E30]/75"],
-html.light [class*="bg-[#1A2B42]/85"] {
-  background-color: #E7E5E4 !important;
-  color: #1E2938 !important;
-}
-
-/* Global Text Colors Override for light mode (dark slate) */
-html.light h1,
-html.light h2,
-html.light h3,
-html.light h4,
-html.light h5,
-html.light h6,
-html.light p,
-html.light span,
-html.light div,
-html.light strong,
-html.light label,
-html.light .text-white,
-html.light [class*="text-white"],
-html.light .text-text-primary,
-html.light [class*="text-text-primary"] {
-  color: #1E2938 !important;
-}
-
-/* Primary Color Overrides (Turquoise/Teal -> Neumorphic Primary Dark Teal) */
-html.light .text-teal,
-html.light [class*="text-teal"] {
-  color: #006666 !important;
-}
-html.light .text-status-success,
-html.light [class*="text-status-success"] {
-  color: #00A63D !important;
-}
-html.light .text-status-warning,
-html.light [class*="text-status-warning"] {
-  color: #D97706 !important;
-}
-
-/* Muted Text Overrides */
-html.light .text-text-muted,
-html.light [class*="text-text-muted"] {
-  color: #4B5563 !important;
-}
-
-/* Neumorphic Extruded Cards & Containers (tactile popping out) */
-html.light aside,
-html.light .card-article,
-html.light .dash-milestone-card,
-html.light .bg-navy-surface:not(input):not(select):not(textarea):not(button),
-html.light .bg-navy-elevated:not(input):not(select):not(textarea):not(button),
-html.light [class*="bg-[#121E30]"]:not([class*="/"]):not(input):not(select):not(textarea):not(button),
-html.light [class*="bg-[#1A2B42]"]:not([class*="/"]):not(input):not(select):not(textarea):not(button) {
-  background-color: #E7E5E4 !important;
-  box-shadow: 4px 4px 8px #c8c6c5, -4px -4px 8px #ffffff !important;
-  border: none !important;
-  border-radius: 16px !important;
-  color: #1E2938 !important;
-}
-
-/* Specific styling for page section card panels in light mode */
-html.light .theme-card-panel {
-  background-color: #E7E5E4 !important;
-  box-shadow: 6px 6px 12px #c8c6c5, -6px -6px 12px #ffffff !important;
-  border: none !important;
-  border-radius: 24px !important;
-  padding: 24px !important;
-}
-
-/* Specific styling for stat cards in light mode */
-html.light .dash-stat-item {
-  background-color: #E7E5E4 !important;
-  box-shadow: 4px 4px 8px #c8c6c5, -4px -4px 8px #ffffff !important;
-  border: none !important;
-  border-radius: 20px !important;
-  padding: 20px !important;
-}
-
-/* Hide dashed layout separator lines in light mode */
-html.light .border-dashed,
-html.light [class*="border-dashed"] {
-  border-style: none !important;
-  border-color: transparent !important;
-  border-width: 0 !important;
-}
-
-/* Neumorphic Inset Containers (wells/tracks carved into the surface) */
-html.light .bg-navy-surface\/40,
-html.light [class*="bg-navy-surface/40"],
-html.light [class*="bg-navy/40"],
-html.light [class*="bg-[#121E30]/20"],
-html.light [class*="bg-[#121E30]/40"],
-html.light [class*="bg-[#121E30]/65"],
-html.light .kanban-column,
-html.light [class*="bg-navy/50"] {
-  background-color: #E7E5E4 !important;
-  box-shadow: inset 4px 4px 8px #c8c6c5, inset -4px -4px 8px #ffffff !important;
-  border: none !important;
-  border-radius: 16px !important;
-}
-
-/* Form inputs & controls (pressed inset style) */
-html.light input[type="text"],
-html.light input[type="email"],
-html.light input[type="password"],
-html.light select,
-html.light textarea {
-  background-color: #E7E5E4 !important;
-  color: #1E2938 !important;
-  box-shadow: inset 3px 3px 6px #c8c6c5, inset -3px -3px 6px #ffffff !important;
-  border: none !important;
-  border-radius: 8px !important;
-  outline: none !important;
-}
-html.light input[type="text"]:focus,
-html.light input[type="email"]:focus,
-html.light input[type="password"]:focus,
-html.light select:focus,
-html.light textarea:focus {
-  box-shadow: inset 4px 4px 8px #b8b6b5, inset -4px -4px 8px #ffffff !important;
-}
-
-/* Buttons (extruded convex style, hover feedback) */
-html.light button,
-html.light a.bg-teal,
-html.light button.bg-teal,
-html.light [class*="bg-teal"] {
-  background-color: #E7E5E4 !important;
-  color: #006666 !important;
-  box-shadow: 4px 4px 8px #c8c6c5, -4px -4px 8px #ffffff !important;
-  border: none !important;
-  border-radius: 8px !important;
-  font-weight: 700 !important;
-  transition: all 0.2s ease-in-out !important;
-}
-
-html.light button:hover,
-html.light a.bg-teal:hover,
-html.light button.bg-teal:hover,
-html.light [class*="bg-teal"]:hover {
-  box-shadow: 2px 2px 4px #c8c6c5, -2px -2px 4px #ffffff !important;
-  color: #004d4d !important;
-}
-
-html.light button:active,
-html.light a.bg-teal:active,
-html.light button.bg-teal:active,
-html.light [class*="bg-teal"]:active {
-  box-shadow: inset 3px 3px 6px #c8c6c5, inset -3px -3px 6px #ffffff !important;
-}
-
-/* Sidebar navigation links */
-html.light aside nav a.active,
-html.light aside a.active,
-html.light [class*="bg-teal"].active {
-  background-color: #E7E5E4 !important;
-  color: #006666 !important;
-  box-shadow: inset 4px 4px 8px #c8c6c5, inset -4px -4px 8px #ffffff !important;
-}
-
-html.light aside nav a:not(.active),
-html.light aside a:not(.active) {
-  color: #1E2938 !important;
-  box-shadow: none !important;
-  background: transparent !important;
-}
-
-html.light aside nav a:not(.active):hover,
-html.light aside a:not(.active):hover {
-  box-shadow: inset 2px 2px 4px #c8c6c5, inset -2px -2px 4px #ffffff !important;
-  background-color: #E7E5E4 !important;
-}
-
-/* Global border and division replacements */
-html.light [class*="border-\[#1B2A3F\]"],
-html.light [class*="border-\[#253347\]"],
-html.light [class*="border-border"],
-html.light [class*="divide-\[#1B2A3F\]"],
-html.light [class*="divide-\[#253347\]"] {
-  border-color: #D1D5DB !important;
-}
-
-/* Gantt timeline bars in light mode */
-html.light [class*="bg-teal\/10"] {
-  background-color: #0066661a !important;
-}
-
-/* Modal details overlay */
-html.light .fixed.inset-0.bg-black\/70 {
-  background-color: rgba(30, 41, 56, 0.4) !important;
-  backdrop-filter: blur(8px) !important;
-}
-
-/* Modal boxes popping out */
-html.light .fixed.inset-0.z-\[9999\] > div,
-html.light .fixed.inset-0.z-50 > div {
-  background-color: #E7E5E4 !important;
-  box-shadow: 8px 8px 16px #c8c6c5, -8px -8px 16px #ffffff !important;
-  border: none !important;
-  border-radius: 16px !important;
-}
-
-/* Quick Edit Popover Bubble */
-html.light .absolute.z-50.w-72 {
-  background-color: #E7E5E4 !important;
-  box-shadow: 6px 6px 12px #c8c6c5, -6px -6px 12px #ffffff !important;
-  border: none !important;
-  border-radius: 12px !important;
-}
-
-/* Radial Gauge adjust ticks background */
-html.light line[stroke="#1B2A3F"] {
-  stroke: #D1D5DB !important;
-}
-
-/* Barcode logs ticks background */
-html.light rect[fill="#1B2A3F"] {
-  fill: #D1D5DB !important;
-}
-
-/* Progress bar tracks looking like carved slot */
-html.light .bg-\[\#1B2A3F\],
-html.light [class*="bg-[#1B2A3F]"] {
-  background-color: #E7E5E4 !important;
-  box-shadow: inset 2px 2px 4px #c8c6c5, inset -2px -2px 4px #ffffff !important;
-  border-radius: 9999px !important;
-}
-
-/* Light Mode Status Badges background corrections */
-html.light [class*="bg-[#122D23]"],
-html.light [class*="bg-status-success/10"] {
-  background-color: #DEF7EC !important; /* light green */
-}
-html.light [class*="bg-[#2D2512]"],
-html.light [class*="bg-[#2D2512]/30"],
-html.light [class*="bg-status-warning/10"] {
-  background-color: #FEF3C7 !important; /* light yellow */
-}
-html.light [class*="bg-[#2D1E1E]"],
-html.light [class*="bg-status-danger/10"] {
-  background-color: #FDE8E8 !important; /* light red */
-}
-
-/* Inline card add input wrapper and empty column placeholders in light mode */
-html.light .kanban-add-card-wrapper {
-  background-color: #E7E5E4 !important;
-  box-shadow: inset 3px 3px 6px #c8c6c5, inset -3px -3px 6px #ffffff !important;
-  border: none !important;
-  border-radius: 8px !important;
-}
-html.light .kanban-add-card-wrapper input {
-  background: transparent !important;
-  box-shadow: none !important;
-  color: #1E2938 !important;
-  border: none !important;
-}
-html.light .kanban-add-card-wrapper input::placeholder {
-  color: #4B5563 !important;
-  opacity: 0.6;
-}
-html.light .kanban-empty-placeholder {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-html.light .kanban-empty-placeholder span {
-  color: #4B5563 !important;
-  opacity: 0.6;
-}
-
-/* Neumorphic styling for View Switcher Toggle on board pages */
-html.light [class*="bg-black/20"] {
-  background-color: #E7E5E4 !important;
-  box-shadow: inset 2px 2px 4px #c8c6c5, inset -2px -2px 4px #ffffff !important;
-  border-radius: 6px !important;
-  border: none !important;
-}
-html.light [class*="bg-white/20"] {
-  background-color: #E7E5E4 !important;
-  box-shadow: 2px 2px 4px #c8c6c5, -2px -2px 4px #ffffff !important;
-  color: #006666 !important;
-  border-radius: 4px !important;
-  font-weight: 800 !important;
-}
-
-/* Reset icon buttons, close buttons, dropdown items, and navigation tabs in light mode */
-html.light button.text-text-muted,
-html.light button.hover\:text-white,
-html.light button[class*="hover:text-white"],
-html.light .absolute button,
-html.light [class*="absolute"] button:not(.bg-teal):not(.btn-primary),
-html.light button.p-1,
-html.light button.p-0\.5,
-html.light button.p-2 {
-  background: transparent !important;
-  box-shadow: none !important;
-  border: none !important;
-  border-radius: 4px !important;
-}
-
-/* Progress bar fills and active indicator tracks in light mode should be dark slate/black */
-html.light .bg-teal:not(button):not(a),
-html.light [class*="bg-teal"]:not(button):not(a):not(.theme-card-panel):not(.dash-stat-item),
-html.light [class*="bg-[#1B2A3F]"] > div {
-  background-color: #1E2938 !important;
-  box-shadow: none !important;
-}
-
-/* Semi-transparent active indicator tracks in light mode */
-html.light [class*="bg-teal/70"] {
-  background-color: rgba(30, 41, 56, 0.7) !important;
-  box-shadow: none !important;
-}
-html.light [class*="bg-teal/40"] {
-  background-color: rgba(30, 41, 56, 0.4) !important;
-  box-shadow: none !important;
-}
-
-/* Make board headers plain white/same background as other pages in light mode */
-html.light .board-header-panel {
-  background-color: transparent !important;
-  background: transparent !important;
-  border-bottom: none !important;
-}
-
-/* Toast Slide-In From Top Center Animation */
-@keyframes slideInDown {
-  from {
-    transform: translate(-50%, -2rem);
-    opacity: 0;
-  }
-  to {
-    transform: translate(-50%, 0);
-    opacity: 1;
-  }
-}
-.animate-slide-in-down {
-  animation: slideInDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* Keep bg-transparent textareas, inputs, and select elements transparent in light mode */
-html.light textarea.bg-transparent,
-html.light input.bg-transparent,
-html.light select.bg-transparent {
-  background-color: transparent !important;
-  box-shadow: none !important;
-  border: none !important;
-}
-
-/* Make sure placeholder text has readable contrast on light backgrounds */
-html.light textarea::placeholder,
-html.light input::placeholder {
-  color: rgba(75, 85, 99, 0.6) !important;
-}
-
-/* Styling containers that have dark background #08101f in light mode */
-html.light div[class*="bg-[#08101f]"],
-html.light div[class*="bg-[#08101f]/"],
-html.light [class*="bg-[#08101f]"]:not(input):not(textarea):not(button) {
-  background-color: #E7E5E4 !important;
-  color: #1E2938 !important;
-  box-shadow: inset 3px 3px 6px #c8c6c5, inset -3px -3px 6px #ffffff !important;
-  border: none !important;
-  border-radius: 12px !important;
-}
-
-/* Neumorphic Checkbox styling for light mode */
-html.light input[type="checkbox"] {
-  background-color: #E7E5E4 !important;
-  border: 1px solid #D1D5DB !important;
-  color: #006666 !important;
-}
-
-/* Notifications Panel Overrides for Light Mode */
-html.light .notifications-panel {
-  background-color: #E7E5E4 !important;
-  color: #1E2938 !important;
-  border-left: 1px solid #D1D5DB !important;
-  box-shadow: -6px 0 24px rgba(0, 0, 0, 0.08) !important;
-  border-radius: 0 !important;
-}
-
-html.light .notifications-panel-header {
-  background-color: #E0DDD9 !important;
-  border-bottom: 1px solid #D1D5DB !important;
-}
-
-html.light .notifications-panel-header span {
-  color: #1E2938 !important;
-}
-
-html.light .notifications-panel-header button {
-  background: transparent !important;
-  box-shadow: none !important;
-  color: #006666 !important;
-}
-
-html.light .notifications-panel-header button:hover {
-  color: #004d4d !important;
-}
-
-html.light .notifications-panel .notifications-feed-item,
-html.light div.notifications-panel div.notifications-feed-item[class*="bg-teal"],
-html.light div.notifications-panel div.notifications-feed-item[class*="bg-transparent"] {
-  background-color: transparent !important;
-  color: #1E2938 !important;
-  border-bottom: 1px solid #D1D5DB !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  margin: 0 !important;
-}
-
-/* Unread notifications: subtle light green/teal background tint in light mode */
-html.light div.notifications-panel div.notifications-feed-item[class*="bg-teal"] {
-  background-color: rgba(0, 102, 102, 0.05) !important;
-}
-
-html.light div.notifications-panel div.notifications-feed-item[class*="bg-teal"]:hover {
-  background-color: rgba(0, 102, 102, 0.09) !important;
-}
-
-/* Read notifications: transparent or very light stone hover in light mode */
-html.light div.notifications-panel div.notifications-feed-item[class*="bg-transparent"]:hover {
-  background-color: rgba(0, 0, 0, 0.03) !important;
-}
-
-html.light .notifications-feed-item-title,
-html.light .notifications-feed-item span.text-white,
-html.light .notifications-feed-item div.text-white {
-  color: #1E2938 !important;
-}
-
-html.light .notifications-feed-item-message,
-html.light .notifications-feed-item p.text-text-muted,
-html.light .notifications-feed-item span.text-text-muted {
-  color: #4B5563 !important;
-}
-
-/* Links inside notifications panel (e.g. View Details) */
-html.light .notifications-feed-item a {
-  color: #006666 !important;
-}
-html.light .notifications-feed-item a:hover {
-  color: #004d4d !important;
-}
-
-/* Actions inside notifications panel items (Mark as read check button) */
-html.light .notifications-feed-item button {
-  background: transparent !important;
-  box-shadow: none !important;
-  color: #4B5563 !important;
-}
-html.light .notifications-feed-item button:hover {
-  color: #006666 !important;
-}
-
-/* Unread dot indicator override in light mode */
-html.light .notifications-feed-item span.bg-teal {
-  background-color: #006666 !important;
-}
-
-/* All caught up inbox icon / message styling in light mode */
-html.light .notifications-panel svg.text-text-muted\/40 {
-  color: #9CA3AF !important;
-}
-html.light .notifications-panel p,
-html.light .notifications-panel span.text-text-muted {
-  color: #4B5563 !important;
-}
-
-/* Global scale-up and fade-in modal animations */
+/* Modal Animations */
 @keyframes scaleUp {
   from {
-    transform: scale(0.95);
+    transform: scale(0.96);
     opacity: 0;
   }
   to {
@@ -602,7 +83,7 @@ html.light .notifications-panel span.text-text-muted {
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(4px);
   }
   to {
     opacity: 1;
@@ -611,77 +92,22 @@ html.light .notifications-panel span.text-text-muted {
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Premium Card Hover Lift & Glow Animations */
+/* Card Hover Lift */
 .card-article {
-  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), 
-              box-shadow 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), 
-              border-color 0.22s ease, 
-              background-color 0.15s ease !important;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 0.15s ease;
 }
 
 .card-article:hover {
-  transform: translateY(-3px) scale(1.01) !important;
-  box-shadow: 0 12px 24px -10px rgba(0, 229, 200, 0.18), 
-              0 4px 12px -5px rgba(0, 0, 0, 0.3) !important;
+  transform: translateY(-2px);
+  border-color: rgba(200, 255, 0, 0.35) !important;
+  box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.7), 0 0 16px -4px rgba(200, 255, 0, 0.15);
 }
 
-/* Light mode neumorphism overrides for card hover */
-html.light .card-article:hover {
-  transform: translateY(-3px) scale(1.01) !important;
-  box-shadow: 6px 6px 12px #c8c6c5, -6px -6px 12px #ffffff !important;
-}
-
-/* Smooth drag states */
 .card-article:active {
-  transform: translateY(1px) scale(0.99) !important;
-  cursor: grabbing !important;
-}
-
-/* Kanban column card entry scale animations */
-@keyframes cardEntry {
-  from {
-    opacity: 0;
-    transform: translateY(12px) scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.card-article {
-  animation: cardEntry 0.35s cubic-bezier(0.16, 1, 0.3, 1) backwards;
-}
-
-/* Micro-interaction transitions for buttons, tabs, and input focus states */
-.project-dropdown-container button,
-.assignee-dropdown-container button,
-.date-picker-container button,
-.quick-edit-popover button,
-.tabs-container button,
-.tab-button {
-  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), 
-              background-color 0.15s ease, 
-              border-color 0.15s ease, 
-              color 0.15s ease;
-}
-
-.project-dropdown-container button:hover,
-.assignee-dropdown-container button:hover,
-.date-picker-container button:hover,
-.quick-edit-popover button:hover {
-  transform: translateY(-1px);
-}
-
-.project-dropdown-container button:active,
-.assignee-dropdown-container button:active,
-.date-picker-container button:active {
   transform: translateY(0);
 }
-
-
-
-
